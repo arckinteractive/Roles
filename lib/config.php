@@ -2,14 +2,15 @@
 
 
 
-function roles_get_roles() {
+function roles_get_roles_config() {
 	$roles = array(
 		'affiliate' => array(
 			'name' => 'roles:nd:affiliate',
 			'extends' => array(),
-			'privileges' => array(
+			'permissions' => array(
 				'actions' => array(
-					'group/save' => 'deny'
+					'group/save' => 'deny',
+					'group/delete' => 'deny'
 				),
 				'views' => array(
 				),
@@ -23,7 +24,7 @@ function roles_get_roles() {
 		'adherent' => array(
 			'name' => 'roles:nd:adherent',
 			'extends' => array(),
-			'privileges' => array(
+			'permissions' => array(
 				'actions' => array(
 					'group/save' => 'deny'
 				),
