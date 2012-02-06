@@ -6,7 +6,7 @@ function roles_get_roles_config() {
 	$roles = array(
 		'affiliate' => array(
 			'name' => 'roles:nd:affiliate',
-			'extends' => array(),
+			'extends' => array('adherent'),
 			'permissions' => array(
 				'actions' => array(
 					'group/save' => 'deny',
@@ -18,6 +18,7 @@ function roles_get_roles_config() {
 					'group/new/$guid' => 'deny'
 				),
 				'menus' => array(
+					'site:blog' => 'allow'
 				),
 			)
 		),

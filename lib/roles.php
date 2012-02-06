@@ -64,9 +64,13 @@ function roles_cache_permissions($role) {
 	}
 	
 	// Let' start by processing role extensions
-	if (is_array($role->extends) &&  !empty($role->extends)) {
-		foreach ($role->extends as $extended_role_name) {
-			$extended_role = get_role_by_name($extended_role_name);
+	$extends = $role->extends;
+	if (!empty($role->extends) && !is_array($extends)) {
+		$extends = array($extends);	
+	}
+	if (is_array($extends) &&  !empty($extends)) {
+		foreach ($extends as $extended_role_name) {
+			$extended_role = roles_get_role_by_name($extended_role_name);
 			$extended_permissions = unserialize($extended_role->permissions);
 			foreach ($extended_permissions as $type => $permission_rules) {
 				if (is_array($PERMISSIONS_CACHE[$role->name][$type])) {
@@ -146,4 +150,16 @@ function roles_create_from_config() {
 		}
 	}
 	
+}
+
+function roles_check_update() {
+	$hash = elgg_get_plugin_setting('roles_hash');
+	$roles_array = roles_get_roles_config();
+	
+	$current_hash = sha1(serialize($roles_array));
+
+	if ($hash != $current_hash) {
+		roles_create_from_config();
+		elgg_set_plugin_setting('roles_hash', $current_hash);
+	}
 }

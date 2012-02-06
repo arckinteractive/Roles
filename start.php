@@ -32,6 +32,7 @@ function roles_init() {
 		elgg_extend_view('forms/account/settings', 'roles/settings/account/role', 150);
 	}
 	
+	roles_check_update();
 	
 }
 
@@ -46,7 +47,7 @@ function roles_menus_permissions($event, $type, $object) {
 	
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'menus');
-		error_log(print_r($role_perms, 1));
+		// error_log(print_r($role_perms, 1));
 		if (is_array($role_perms) && !empty($role_perms)) {
 			foreach ($role_perms as $menu => $permission) {
 				switch ($permission) {
