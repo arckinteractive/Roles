@@ -21,30 +21,75 @@ function roles_init() {
 	elgg_load_library('roles');
 	elgg_load_library('roles_config');
 
-	elgg_register_plugin_hook_handler('view', 'all', 'roles_views_permissions');
+	
 	elgg_register_plugin_hook_handler('action', 'all', 'roles_actions_permissions');
 	elgg_register_event_handler('pagesetup', 'system', 'roles_menus_permissions');
 	elgg_register_event_handler('pagesetup', 'system', 'roles_pages_permissions');
+	
+	roles_register_views_hook_handler();
 
 
 	if (elgg_is_admin_logged_in()) {
 		elgg_register_plugin_hook_handler('usersettings:save', 'user', 'roles_users_settings_save');
-		elgg_extend_view('forms/account/settings', 'roles/settings/account/role', 150);
 	}
 	
 	roles_check_update();
 	
 }
 
+function roles_register_views_hook_handler() {
+	$role = roles_get_role();
+	if (elgg_instanceof($role, 'object', 'role')) {
+		$role_perms = roles_get_role_permissions($role, 'views');
+		if (is_array($role_perms) && !empty($role_perms)) {
+			foreach ($role_perms as $view => $perm_details) {
+				switch ($perm_details['rule']) {
+					case 'deny':
+						elgg_register_plugin_hook_handler('view', $view, 'roles_views_permissions');
+						break;
+					case 'extend':
+						$params = $perm_details['view_extension'];
+						$view_extension = $params['view'];
+						$priority = isset($params['priority']) ? $params['priority'] : 501;
+						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+						elgg_extend_view($view, $view_extension, $priority, $viewtype);
+						break;
+					case 'replace':
+						$params = $perm_details['view_replacement'];
+						$location = elgg_get_root_path() . $params['location'];
+						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+						elgg_set_view_location($view, $location, $viewtype);
+						break;
+					case 'allow':
+					default:
+						break;
+				}
+			}
+		}
+	}
+}
+
 function roles_views_permissions($hook_name, $entity_type, $return_value, $params) {
+
+	$role = roles_get_role();
+	if (elgg_instanceof($role, 'object', 'role')) {
+		$role_perms = roles_get_role_permissions($role, 'views');
+		if (is_array($role_perms) && !empty($role_perms)) {
+			foreach ($role_perms as $view => $perm_details) {
+				if ($params['view'] == $view) {
+					return '';	// Supress view output
+				}
+			}
+		}
+	}		
 }
 
 function roles_actions_permissions($hook_name, $entity_type, $return_value, $params) {
 }
 
 function roles_menus_permissions($event, $type, $object) {
+
 	$role = roles_get_role();
-	
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'menus');
 		if (is_array($role_perms) && !empty($role_perms)) {
@@ -54,7 +99,7 @@ function roles_menus_permissions($event, $type, $object) {
 						list($menu_name, $item_name) = explode('::', $menu);
 						elgg_unregister_menu_item($menu_name, $item_name);
 						break;
-					case 'append':
+					case 'extend':
 						$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 						$menu_obj = ElggMenuItem::factory($menu_item);
 						elgg_register_menu_item($menu, $menu_obj);

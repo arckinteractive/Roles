@@ -19,6 +19,23 @@ function roles_get_roles_config() {
 				),
 				
 				'views' => array(
+					/* 'input/password' => array('rule' => 'deny'), */
+
+					'forms/account/settings' => array(
+						'rule' => 'extend',
+						'view_extension' => array(
+							'view' => 'roles/settings/account/role',
+							'priority' => 150
+						)
+					),
+					
+					'roles/settings/account/role' => array(
+						'rule' => 'replace',
+						'view_replacement' => array(
+							'location' => 'mod/roles/views',
+						)
+					),
+	
 				),
 				
 				'pages' => array(
@@ -39,7 +56,7 @@ function roles_get_roles_config() {
 					),
 					
 					'site' => array(
-						'rule' => 'append',
+						'rule' => 'extend',
 						'menu_item' => array(
 							'name' => 'books',
 							'text' => 'Books',
