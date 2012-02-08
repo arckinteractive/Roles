@@ -47,14 +47,25 @@ function roles_menus_permissions($event, $type, $object) {
 	
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'menus');
-		// error_log(print_r($role_perms, 1));
 		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $menu => $permission) {
-				switch ($permission) {
+			foreach ($role_perms as $menu => $perm_details) {
+ 				switch ($perm_details['rule']) {
 					case 'deny':
-						list($menu_name, $item_name) = explode(':', $menu);
+						list($menu_name, $item_name) = explode('::', $menu);
 						elgg_unregister_menu_item($menu_name, $item_name);
 						break;
+					case 'append':
+						$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+						$menu_obj = ElggMenuItem::factory($menu_item);
+						elgg_register_menu_item($menu, $menu_obj);
+						break;
+					case 'replace':
+						list($menu_name, $item_name) = explode('::', $menu);
+						$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+						$menu_obj = ElggMenuItem::factory($menu_item);
+						roles_replace_menu($menu_name, $item_name, $menu_obj);
+						break;
+					case 'allow':
 					default:
 						break;
 				}

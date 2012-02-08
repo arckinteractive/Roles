@@ -163,3 +163,65 @@ function roles_check_update() {
 		elgg_set_plugin_setting('roles_hash', $current_hash);
 	}
 }
+
+
+/******************* Helper functions for menu operations ***********************/
+
+function roles_replace_menu($menu_name, $item_name, $menu_obj) {
+	global $CONFIG;
+
+	if (false !== $index = roles_find_menu_index($menu_name, $item_name)) {
+		array_splice($CONFIG->menus[$menu_name], $index, 1, array($menu_obj));
+	}
+}
+
+function roles_find_menu_index($menu_name, $item_name) {
+	global $CONFIG;
+	$index = -1;
+	$found = false;
+	
+	if (is_array($CONFIG->menus[$menu_name])) {
+		$count = count($CONFIG->menus[$menu_name]);
+		while(!$found && (++$index < $count)) {
+			if ($CONFIG->menus[$menu_name][$index]->getName() === $item_name) {
+				$found = true;
+			}
+		}
+	}
+	
+	return $found ? $index : false;	
+}
+
+
+function roles_prepare_menu_vars($vars) {
+	$user = elgg_get_logged_in_user_entity();
+	$self_username = $user->username;
+	$self_guid = $user->guid;
+	
+	$prepared_vars = $vars;
+	if (isset($prepared_vars['href'])) {
+		$prepared_vars['href'] = str_replace('{$self_username}', $self_username, $prepared_vars['href']);
+		$prepared_vars['href'] = str_replace('{$self_guid}', $self_guid, $prepared_vars['href']);
+	}
+	
+	return $prepared_vars;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
