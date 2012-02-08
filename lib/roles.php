@@ -194,34 +194,24 @@ function roles_find_menu_index($menu_name, $item_name) {
 
 
 function roles_prepare_menu_vars($vars) {
-	$user = elgg_get_logged_in_user_entity();
-	$self_username = $user->username;
-	$self_guid = $user->guid;
 	
 	$prepared_vars = $vars;
 	if (isset($prepared_vars['href'])) {
-		$prepared_vars['href'] = str_replace('{$self_username}', $self_username, $prepared_vars['href']);
-		$prepared_vars['href'] = str_replace('{$self_guid}', $self_guid, $prepared_vars['href']);
+		$prepared_vars['href'] = roles_replace_dynamic_paths($prepared_vars['href']);
 	}
 	
 	return $prepared_vars;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function roles_replace_dynamic_paths($str) {
+	$user = elgg_get_logged_in_user_entity();
+	$self_username = $user->username;
+	$self_guid = $user->guid;
+	
+	$res = str_replace('{$self_username}', $self_username, $str); 
+	$res = str_replace('{$self_guid}', $self_guid, $res);
+	
+	return $res;
+}
 
 

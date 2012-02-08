@@ -39,7 +39,7 @@ function roles_get_roles_config() {
 				),
 				
 				'pages' => array(
-					'group/new/$guid' => array('rule' => 'deny')
+					'groups/add/{$self_guid}' => array('rule' => 'deny')
 				),
 				
 				'menus' => array(

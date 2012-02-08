@@ -19,6 +19,8 @@ $english = array(
 
 	'user:role:success' => 'User role has been successfully updated',
 	'user:role:fail' => 'Could not update user role. Please try again later.',
+	
+	'roles:page:denied' => 'Sorry, but you do not have the necessary privileges to view that page.',
 
 );
 
