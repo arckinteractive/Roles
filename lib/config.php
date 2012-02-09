@@ -76,13 +76,6 @@ function roles_get_roles_config() {
 				),
 
 				'hooks' => array(
-					'usersettings:save::user' => array(
-						'rule' => 'extend',
-						'hook' => array(
-							'handler' => 'roles_user_settings_save',
-							'priority' => 500,
-						)
-					),
 				),
 	
 			)
@@ -120,6 +113,13 @@ function roles_get_roles_config() {
 						)
 					),
 					*/
+					'usersettings:save::user' => array(
+						'rule' => 'extend',
+						'hook' => array(
+							'handler' => 'roles_user_settings_save',
+							'priority' => 500,
+						)
+					),
 	
 				),
 			)

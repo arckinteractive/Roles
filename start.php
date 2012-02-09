@@ -30,7 +30,7 @@ function roles_init() {
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 
 	roles_register_views_hook_handler();
-
+	
 }
 
 function roles_register_views_hook_handler() {
