@@ -21,6 +21,7 @@ $english = array(
 	'user:role:fail' => 'Could not update user role. Please try again later.',
 	
 	'roles:page:denied' => 'Sorry, but you do not have the necessary privileges to view that page.',
+	'roles:action:denied' => 'Sorry, but you do not have the necessary privileges to perform that action.',
 
 	/* REGISTRATION / LOGIN */
 	'nd:registertobe' => 'Register To Be:',

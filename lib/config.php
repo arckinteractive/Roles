@@ -63,7 +63,7 @@ function roles_get_roles_config() {
 			'permissions' => array(
 
 				'actions' => array(
-					'usersettings/save' => array('rule' => 'deny')
+					'usersettings/save' => array('rule' => 'allow')
 				),
 
 				'pages' => array(
@@ -82,6 +82,10 @@ function roles_get_roles_config() {
 			'extends' => array(),
 			'permissions' => array(
 
+				'actions' => array(
+					'usersettings/save' => array('rule' => 'deny')
+				),
+				
 				'menus' => array(
 					'site::members' => array('rule' => 'deny')
 				),

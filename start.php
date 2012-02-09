@@ -87,13 +87,23 @@ function roles_views_permissions($hook_name, $entity_type, $return_value, $param
 }
 
 
-function roles_actions_permissions($hook_name, $entity_type, $return_value, $params) {
+function roles_actions_permissions($hook, $type, $return_value, $params) {
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'actions');
 		if (is_array($role_perms) && !empty($role_perms)) {
 			foreach ($role_perms as $action => $perm_details) {
-
+				if ($action == $type) {
+ 					switch ($perm_details['rule']) {
+ 						case 'deny':
+							register_error(elgg_echo('roles:action:denied'));
+ 							return false;
+							break;
+						case 'allow':
+						default:
+							break;
+					}
+				}
 			}
 		}
 	}
