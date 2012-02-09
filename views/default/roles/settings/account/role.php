@@ -11,11 +11,11 @@ $current_role = roles_get_role($user);
 if (elgg_instanceof($current_role, 'object', 'role')) {
 	$current_role_name = $current_role->name;
 } else {
-	$current_role_name = '_default';
+	$current_role_name = DEFAULT_ROLE;
 }
 
 $all_roles = roles_get_all_roles();
-$roles_options = array('_default' => elgg_echo('roles:nd:_default'));
+$roles_options = array();
 if (is_array($all_roles) && !empty($all_roles)) {
 	foreach ($all_roles as $role) {
 		$roles_options[$role->name] = $role->title;

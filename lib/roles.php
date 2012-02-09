@@ -1,13 +1,12 @@
 <?php 
 
 function roles_get_role($user = null) {
-	if (!$user) {
-		$user = elgg_get_logged_in_user_entity();
-	}
+	
+	$user = $user ? $user : elgg_get_logged_in_user_entity();
 	if (!elgg_instanceof($user, 'user')) {
-		return null;
+		return false;
 	}
-
+	
 	$options = array(
 		'type' => 'object',
 		'subtype' => 'role',
@@ -20,8 +19,32 @@ function roles_get_role($user = null) {
 	if (is_array($roles) && !empty($roles)) {
 		return $roles[0];
 	} else {
-		return false;
+		return roles_get_role_by_name(DEFAULT_ROLE);
 	}
+}
+
+function roles_set_role($role, $user = null) {
+	if (!elgg_instanceof($role, 'object', 'role')) {
+		return false;	// Couldn't set new role
+	}
+
+	$user = $user ? $user : elgg_get_logged_in_user_entity();
+	if (!elgg_instanceof($user, 'user')) {
+		return false;	// Couldn't set new role
+	}
+	
+	$current_role = roles_get_role($user);
+	if ($role != $current_role) {
+		remove_entity_relationships($user->guid, 'has_role');
+		if ($role->name != DEFAULT_ROLE) {
+			if (!add_entity_relationship($user->guid, 'has_role', $role->guid)) {
+				return false;	// Couldn't set new role
+			}
+		}
+		return true; // Role has been changed
+	}
+	
+	return null; // There was no change necessary, old and new role are the same
 }
 
 function roles_get_all_roles() {
@@ -70,9 +93,13 @@ function roles_cache_permissions($role) {
 	}
 	if (is_array($extends) &&  !empty($extends)) {
 		foreach ($extends as $extended_role_name) {
+
 			$extended_role = roles_get_role_by_name($extended_role_name);
-			$extended_permissions = unserialize($extended_role->permissions);
-			foreach ($extended_permissions as $type => $permission_rules) {
+			if (!isset($PERMISSIONS_CACHE[$extended_role->name])) {
+				roles_cache_permissions($extended_role);
+			}
+			
+			foreach ($PERMISSIONS_CACHE[$extended_role->name] as $type => $permission_rules) {
 				if (is_array($PERMISSIONS_CACHE[$role->name][$type])) {
 					$PERMISSIONS_CACHE[$role->name][$type] = array_merge($PERMISSIONS_CACHE[$role->name][$type], $permission_rules);
 				} else {
