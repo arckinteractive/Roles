@@ -51,7 +51,7 @@ function roles_get_roles_config() {
 						)
 					),
 				),
-
+	
 				'entities' => array(
 				),
 			)
@@ -74,6 +74,17 @@ function roles_get_roles_config() {
 					'site::blog' => array('rule' => 'deny'),
 					'site::members' => array('rule' => 'allow')
 				),
+
+				'hooks' => array(
+					'usersettings:save::user' => array(
+						'rule' => 'extend',
+						'hook' => array(
+							'handler' => 'roles_user_settings_save',
+							'priority' => 500,
+						)
+					),
+				),
+	
 			)
 		),
 
@@ -82,9 +93,9 @@ function roles_get_roles_config() {
 			'extends' => array(),
 			'permissions' => array(
 
-				'actions' => array(
+				/*'actions' => array(
 					'usersettings/save' => array('rule' => 'deny')
-				),
+				),*/
 				
 				'menus' => array(
 					'site::members' => array('rule' => 'deny')
@@ -100,6 +111,17 @@ function roles_get_roles_config() {
 					),
 				),
 	
+				'hooks' => array(
+					/*
+					'usersettings:save::user' => array(
+						'rule' => 'deny',
+						'hook' => array(
+							'handler' => 'users_settings_save',
+						)
+					),
+					*/
+	
+				),
 			)
 		)
 	);
