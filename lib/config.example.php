@@ -54,41 +54,6 @@ function roles_get_roles_config() {
 	
 				'entities' => array(
 				),
-			),
-
-			'metafields' => array(
-
-				'registration' => array(),
-
-				'profile' => array(
-
-//					'elector_card_number' => array(
-//						'input_type' => 'text',
-//						'required' => true,
-//						'admin_only' => true
-//					),
-//
-//					'municipality' => array(
-//						'input_type' => 'dropdown',
-//						'required' => true,
-//						'options_values' => array(
-//							'municipality1' => elgg_echo('roles:municipality:municipality1'),
-//							'municipality2' => elgg_echo('roles:municipality:municipality2'),
-//							'municipality3' => elgg_echo('roles:municipality:municipality2')
-//						)
-//					),
-//
-//					'terms' => array(
-//						'input_type' => 'checkbox',
-//						'required' => true,
-//						'admin_only' => true
-//					),
-//
-//					'extras' => array(
-//						'input_type' => 'text'
-//					)
-
-				)
 			)
 		),
 
@@ -163,3 +128,5 @@ function roles_get_roles_config() {
 
 	return $roles;
 }
+
+
