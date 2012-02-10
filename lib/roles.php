@@ -1,4 +1,15 @@
-<?php 
+<?php
+/**
+ * @package roles
+ * @note The intention of this module is that plugin authors should be able to develop most functionality without the explicit need of knowing a user’s certain role. Most of role based functionality – i.e. what the user can see and interact with – can be moved to the configuration array; hence no need for handling role based conditionals in the code.
+ */
+
+/**
+ * Obtain a role of a given user
+ * 
+ * @param ElggUser $user
+ * @return ElggRole 
+ */
 
 function roles_get_role($user = null) {
 	
@@ -22,6 +33,14 @@ function roles_get_role($user = null) {
 		return roles_get_role_by_name(DEFAULT_ROLE);
 	}
 }
+
+/**
+ * Assign a role to a particular user
+ *
+ * @param ElggRole $role
+ * @param ElggUser $user
+ * @return bool
+ */
 
 function roles_set_role($role, $user = null) {
 	if (!elgg_instanceof($role, 'object', 'role')) {
@@ -47,6 +66,12 @@ function roles_set_role($role, $user = null) {
 	return null; // There was no change necessary, old and new role are the same
 }
 
+/**
+ * Get all role objects
+ *
+ * @return mixed
+ */
+
 function roles_get_all_roles() {
 	
 	$options = array(
@@ -58,6 +83,15 @@ function roles_get_all_roles() {
 	return elgg_get_entities($options);
 
 }
+
+/**
+ * Obtain a list of permissions associated with a particular role object
+ *
+ * @global array $PERMISSIONS_CACHE
+ * @param ElggRole $role
+ * @param string $permission_type
+ * @return mixed
+ */
 
 function roles_get_role_permissions($role = null, $permission_type = null) {
 	global $PERMISSIONS_CACHE;
@@ -78,6 +112,42 @@ function roles_get_role_permissions($role = null, $permission_type = null) {
 	}
 	
 }
+
+/**
+ *	Obtain a list of metafields (fields) for a given role
+ *
+ * @global array $METAFIELDS_CACHE
+ * @param ElggRole $role
+ * @param string $metafields_type
+ * @return mixed
+ */
+
+function roles_get_role_metafields($role = null, $metafields_type = null) {
+	global $METAFIELDS_CACHE;
+
+	$role = ($role == null) ? roles_get_role() : $role;
+	if (!elgg_instanceof($role, 'object', 'role')) {
+		return false;
+	}
+
+	if (!isset($METAFIELDS_CACHE[$role->name])) {
+		roles_cache_metafields($role);
+	}
+
+	if ($metafields_type) {
+		return $METAFIELDS_CACHE[$role->name][$metafields_type];
+	} else {
+		return $METAFIELDS_CACHE[$role->name];
+	}
+}
+/**
+ * Cache permissions associated with a role object
+ *
+ * @global array $PERMISSIONS_CACHE
+ * @param ElggRole $role
+ *
+ * @return void
+ */
 
 function roles_cache_permissions($role) {
 	global $PERMISSIONS_CACHE;
@@ -120,6 +190,63 @@ function roles_cache_permissions($role) {
 	
 }
 
+/**
+ *	Cache metafields (fields) associated with a particular role object
+ *
+ * @global array $METAFIELDS_CACHE
+ * @param ElggRole $role
+ *
+ * @return void
+ */
+
+function roles_cache_metafields($role) {
+	global $METAFIELDS_CACHE;
+
+	if (!is_array($METAFIELDS_CACHE[$role->name])) {
+		$METAFIELDS_CACHE[$role->name] = array();
+	}
+
+	// Let' start by processing role extensions
+	$extends = $role->extends;
+	if (!empty($role->extends) && !is_array($extends)) {
+		$extends = array($extends);
+	}
+	if (is_array($extends) &&  !empty($extends)) {
+		foreach ($extends as $extended_role_name) {
+
+			$extended_role = roles_get_role_by_name($extended_role_name);
+			if (!isset($METAFIELDS_CACHE[$extended_role->name])) {
+				roles_cache_metafields($extended_role);
+			}
+
+			foreach ($METAFIELDS_CACHE[$extended_role->name] as $type => $metafields_rules) {
+				if (is_array($METAFIELDS_CACHE[$role->name][$type])) {
+					$METAFIELDS_CACHE[$role->name][$type] = array_merge($METAFIELDS_CACHE[$role->name][$type], $metafields_rules);
+				} else {
+					$METAFIELDS_CACHE[$role->name][$type] = $metafields_rules;
+				}
+			}
+		}
+	}
+
+	$metafields = unserialize($role->metafields);
+	foreach ($metafields as $type => $metafields_rules) {
+		if (is_array($METAFIELDS_CACHE[$role->name][$type])) {
+			$METAFIELDS_CACHE[$role->name][$type] = array_merge($METAFIELDS_CACHE[$role->name][$type], $metafields_rules);
+		} else {
+			$METAFIELDS_CACHE[$role->name][$type] = $metafields_rules;
+		}
+	}
+
+}
+
+/**
+ * Get a role object based on it's name
+ *
+ * @param string $role_name
+ * @return mixed
+ */
+
 function roles_get_role_by_name($role_name) {
 	$options = array(
 		'type' => 'object',
@@ -127,7 +254,7 @@ function roles_get_role_by_name($role_name) {
 		'metadata_name_value_pairs' => array('name' => 'name', 'value' => $role_name, 'operand' => '=')
 	);
 	$role_array = elgg_get_entities_from_metadata($options);
-	
+
 	if (is_array($role_array) && !empty($role_array)) {
 		return $role_array[0];
 	} else {
@@ -136,6 +263,11 @@ function roles_get_role_by_name($role_name) {
 	
 }
 
+/**
+ * Process the configuration file and generate ElggRole objects
+ *
+ * @return void
+ */
 
 function roles_create_from_config() {
 	$roles_array = roles_get_roles_config();
@@ -158,6 +290,7 @@ function roles_create_from_config() {
 			$current_role->title = elgg_echo($rdetails['name']);
 			$current_role->extends = $rdetails['extends'];
 			$current_role->permissions = serialize($rdetails['permissions']);
+			$current_role->metafields = serialize($rdetails['metafields']);
 			$current_role->save();
 		} else {
 			// Create new role object
@@ -169,15 +302,22 @@ function roles_create_from_config() {
 			if (!($new_role->save())) {
 				error_log('Could not create new role $rname');
 			} else {
-				// Add metadata
+				// Add metafields
 				$new_role->name = $rname;
 				$new_role->extends = $rdetails['extends'];
 				$new_role->permissions = serialize($rdetails['permissions']);
+				$new_role->metafields = serialize($rdetails['metafields']);
 			}
 		}
 	}
 	
 }
+
+/**
+ * Check if the configuration array has been updated and updates roles accordingly if needed
+ *
+ * @return void
+ */
 
 function roles_check_update() {
 	$hash = elgg_get_plugin_setting('roles_hash');

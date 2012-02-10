@@ -11,7 +11,13 @@ class ElggRole extends ElggObject {
 	public function __construct($guid = null) {
 		parent::__construct($guid);
 	}
-	
+
+	/**
+	 * Obtain a list of users for the current role object
+	 *
+	 * @param array $options An array of $key => $value pairs accepted by {@link elgg_get_entities()}
+	 * @return mixed
+	 */
 	public function getUsers($options) {
 		if ($this->name == DEFAULT_ROLE) {
 			$dbprefix = elgg_get_config('dbprefix');
