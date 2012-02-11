@@ -23,14 +23,6 @@ $english = array(
 	'roles:page:denied' => 'Sorry, but you do not have the necessary privileges to view that page.',
 	'roles:action:denied' => 'Sorry, but you do not have the necessary privileges to perform that action.',
 
-	/* REGISTRATION / LOGIN */
-	'nd:registertobe' => 'Register To Be:',
-	'nd:becomeaffiliate' => 'Become an <span>affiliate</span>',
-	'nd:becomeadherent' => 'Become an <span>adherent</span>',
-	'nd:affiliate:desc' => 'Full access with option to be a candidate, ID and elector card number obligatory. Choice to participate with real ID or with nick name.',
-	'nd:adherent:desc' => 'Able to use a nick name, simple registration with email. Can comment and participate.',
-	
-	
 );
 
 add_translation("en", $english);

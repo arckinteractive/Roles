@@ -52,13 +52,7 @@ function roles_get_roles_config() {
 	
 				'hooks' => array(),
 			),
-			'metafields' => array(
-
-				'registration' => array(),
-
-				'profile' => array()
-				
-			)
+			
 		)
 	);
 
