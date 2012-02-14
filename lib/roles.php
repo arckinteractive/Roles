@@ -326,14 +326,16 @@ function roles_prepare_menu_vars($vars) {
 
 function roles_replace_dynamic_paths($str) {
 	$user = elgg_get_logged_in_user_entity();
-	if (elgg_instanceof($pageowner, 'user')) {
+	if (elgg_instanceof($user, 'user')) {
 		$self_username = $user->username;
 		$self_guid = $user->guid;
 		$role = roles_get_role($user);
 	
 		$res = str_replace('{$self_username}', $self_username, $str); 
 		$res = str_replace('{$self_guid}', $self_guid, $res);
-		$res = str_replace('{$self_rolename}', $role->name, $str); 
+		if (elgg_instanceof($role, 'object', 'role')) {
+			$res = str_replace('{$self_rolename}', $role->name, $str);
+		} 
 	}
 
 	$pageowner = elgg_get_page_owner_entity();
