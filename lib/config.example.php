@@ -24,16 +24,16 @@ $roles = array(
 
 The first level keys (role1, role2, role3) are the role names and must be unique, as they identify the roles themselves. The DEFAULT_ROLE name is reserved, and it will be associated with all members not having a specific (other than default) role. The configuration array always has to contain an entry for DEFAULT_ROLE, with at least the name and the permission keys defined, name being a string and permission being (at least an empty) array.
 
-The ‚Äúpermissions‚Äù section holds individual permission rules that determine what the user can see and interact with on the site. Permissions can contain sections of rules relating to menu items, views, pages, actions and plugin hooks. For most of these permission sections, the basic permission rules are as follows:
+The ìpermissionsî section holds individual permission rules that determine what the user can see and interact with on the site. Permissions can contain sections of rules relating to menu items, views, pages, actions and plugin hooks. For most of these permission sections, the basic permission rules are as follows:
 
 deny: Deny access to a specific item. In some cases this will generate an error message and result in a redirect (for actions and pages), other cases the given item will simply not be rendered (for views and menus). Also, in case of hooks the specified hook will not be triggered.
-allow: Allow access to a specific item. This rule is most useful when extending rules ‚Äì the default role can deny creating new groups, while an extension of the default rule can specifically re-allow group creation.
-extend: Add a new item on the fly to the current page ‚Äì this works for hooks, menus and views. I.e. you can add role specific menu items, extend existing views and create new plugin hooks, just by using the right configuration values.
+allow: Allow access to a specific item. This rule is most useful when extending rules ñ the default role can deny creating new groups, while an extension of the default rule can specifically re-allow group creation.
+extend: Add a new item on the fly to the current page ñ this works for hooks, menus and views. I.e. you can add role specific menu items, extend existing views and create new plugin hooks, just by using the right configuration values.
 replace: Replaces an existing item. Works for views, menus and hooks.
 redirect: Redirects to another page. Works for pages.
  */
 
-function roles_get_roles_config() {
+function roles_get_roles_config($hook_name, $entity_type, $return_value, $params) {
 
 	$roles = array(
 
@@ -56,5 +56,9 @@ function roles_get_roles_config() {
 		)
 	);
 
-	return $roles;
+	if (!is_array($return_value)) {
+		return $roles;
+	} else {
+		return array_merge($return_value, $roles);
+	}
 }

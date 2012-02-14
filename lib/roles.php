@@ -30,7 +30,11 @@ function roles_get_role($user = null) {
 	if (is_array($roles) && !empty($roles)) {
 		return $roles[0];
 	} else {
-		return roles_get_role_by_name(DEFAULT_ROLE);
+		if ($user->isAdmin()) {
+			return roles_get_role_by_name(ADMIN_ROLE);
+		} else {
+			return roles_get_role_by_name(DEFAULT_ROLE);
+		}
 	}
 }
 
@@ -85,7 +89,7 @@ function roles_set_role($role, $user = null) {
 	$current_role = roles_get_role($user);
 	if ($role != $current_role) {
 		remove_entity_relationships($user->guid, 'has_role');
-		if ($role->name != DEFAULT_ROLE) {
+		if (($role->name != DEFAULT_ROLE) && ($role->name != ADMIN_ROLE)) {
 			if (!add_entity_relationship($user->guid, 'has_role', $role->guid)) {
 				return false;	// Couldn't set new role
 			}
@@ -222,9 +226,8 @@ function roles_get_role_by_name($role_name) {
  * @return void
  */
 
-function roles_create_from_config() {
-	$roles_array = roles_get_roles_config();
-	
+function roles_create_from_config($roles_array) {
+		
 	$options = array(
 			'type' => 'object',
 			'subtype' => 'role',
@@ -272,12 +275,12 @@ function roles_create_from_config() {
 
 function roles_check_update() {
 	$hash = elgg_get_plugin_setting('roles_hash');
-	$roles_array = roles_get_roles_config();
-	
+	$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
+
 	$current_hash = sha1(serialize($roles_array));
 
 	if ($hash != $current_hash) {
-		roles_create_from_config();
+		roles_create_from_config($roles_array);
 		elgg_set_plugin_setting('roles_hash', $current_hash);
 	}
 }
