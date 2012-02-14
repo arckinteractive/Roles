@@ -1,136 +1,60 @@
 <?php
 
-function roles_get_roles_config($hook_name, $entity_type, $return_value, $params) {
+/**
+As of this version, there is no fancy admin interface to set up role permission; this has to be done via an associative configuration array. The array resides in the mod/roles/lib/config.php file, and has roughly the following structure:
+
+$roles = array(
+	'role1' => array(
+		'name' => 'Role one',
+		'extends' => array('role2', DEFAULT_ROLE),
+		'permissions' => array( ... )
+	),
+	'role2' => array(
+		'name' => 'Role two',
+		'extends' => array(),
+		'permissions' => array( ... )
+	),
+	DEFAULT_ROLE => array(
+		'name' => 'Role three',
+		'extends' => array(),
+		'permissions' => array( ... )
+	)
+);
+
+
+The first level keys (role1, role2, role3) are the role names and must be unique, as they identify the roles themselves. The DEFAULT_ROLE name is reserved, and it will be associated with all members not having a specific (other than default) role. The configuration array always has to contain an entry for DEFAULT_ROLE, with at least the name and the permission keys defined, name being a string and permission being (at least an empty) array.
+
+The “permissions” section holds individual permission rules that determine what the user can see and interact with on the site. Permissions can contain sections of rules relating to menu items, views, pages, actions and plugin hooks. For most of these permission sections, the basic permission rules are as follows:
+
+deny: Deny access to a specific item. In some cases this will generate an error message and result in a redirect (for actions and pages), other cases the given item will simply not be rendered (for views and menus). Also, in case of hooks the specified hook will not be triggered.
+allow: Allow access to a specific item. This rule is most useful when extending rules – the default role can deny creating new groups, while an extension of the default rule can specifically re-allow group creation.
+extend: Add a new item on the fly to the current page – this works for hooks, menus and views. I.e. you can add role specific menu items, extend existing views and create new plugin hooks, just by using the right configuration values.
+replace: Replaces an existing item. Works for views, menus and hooks.
+redirect: Redirects to another page. Works for pages.
+ */
+
+function roles_get_roles_config() {
 
 	$roles = array(
-
-		'affiliate' => array(
-			'name' => 'roles:nd:affiliate',
-			'extends' => array('adherent'),
-			'permissions' => array(
-
-				'actions' => array(
-					'usersettings/save' => array('rule' => 'allow')
-				),
-
-				'views' => array(
-					/* 'input/password' => array('rule' => 'deny'), */
-
-					/* 'roles/settings/account/role' => array(
-					 'rule' => 'replace',
-					 'view_replacement' => array(
-					 'location' => 'mod/roles/views',
-					 )
-					 ), */
-
-				),
-
-				'pages' => array(
-					'groups/add/{$self_guid}' => array('rule' => 'deny')
-				),
-
-				'menus' => array(
-
-					'site::blog' => array('rule' => 'allow'),
-
-					'site::activity' => array(
-						'rule' => 'replace',
-						'menu_item' => array(
-							'name' => 'mygroups',
-							'text' => 'Any of my Groups',
-							'href' => 'groups/member/{$self_username}',
-						)
-					),
-
-					'site' => array(
-						'rule' => 'extend',
-						'menu_item' => array(
-							'name' => 'books',
-							'text' => 'Books',
-							'href' => 'books/all',
-						)
-					),
-				),
-	
-				'entities' => array(
-				),
-			)
-		),
-
-		'adherent' => array(
-			'name' => 'roles:nd:adherent',
-			'extends' => array(DEFAULT_ROLE),
-			'permissions' => array(
-
-				'actions' => array(
-					'usersettings/save' => array('rule' => 'allow')
-				),
-
-				'pages' => array(
-					'group/new/{$username}' => array('rule' => 'deny')
-				),
-
-				'menus' => array(
-					'site::blog' => array('rule' => 'deny'),
-					'site::members' => array('rule' => 'allow')
-				),
-
-				'hooks' => array(
-				),
-	
-			)
-		),
 
 		DEFAULT_ROLE => array(
 			'name' => 'roles:nd:DEFAULT_ROLE',
 			'extends' => array(),
 			'permissions' => array(
+			
+				'menus' => array(),
 
-				/*'actions' => array(
-					'usersettings/save' => array('rule' => 'deny')
-				),*/
-				
-				'menus' => array(
-					'site::members' => array('rule' => 'deny')
-				),
-
-				'views' => array(
-					'forms/account/settings' => array(
-						'rule' => 'extend',
-						'view_extension' => array(
-							'view' => 'roles/settings/account/role',
-							'priority' => 150
-						)
-					),
-				),
+				'views' => array(),
 	
-				'hooks' => array(
-					/*
-					'usersettings:save::user' => array(
-						'rule' => 'deny',
-						'hook' => array(
-							'handler' => 'users_settings_save',
-						)
-					),
-					*/
-					'usersettings:save::user' => array(
-						'rule' => 'extend',
-						'hook' => array(
-							'handler' => 'roles_user_settings_save',
-							'priority' => 500,
-						)
-					),
+				'pages' => array(),
 	
-				),
-			)
+				'actions' => array(),
+	
+				'hooks' => array(),
+			),
+			
 		)
 	);
 
-	if (!is_array($return_value)) {
-		return $roles;
-	} else {
-		return array_merge($return_value, $roles);
-	}
+	return $roles;
 }
-
-

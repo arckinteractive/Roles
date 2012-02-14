@@ -35,6 +35,36 @@ function roles_get_role($user = null) {
 }
 
 /**
+ * Check if the user has a specific role
+ *
+ * @param ElggUser $user
+ * @return bool
+ */
+
+function roles_has_role($user = null, $role_name = DEFAULT_ROLE) {
+
+	$user = $user ? $user : elgg_get_logged_in_user_entity();
+	if (!elgg_instanceof($user, 'user')) {
+		return false;
+	}
+
+	$options = array(
+		'type' => 'object',
+		'subtype' => 'role',
+		'metadata_name_value_pairs' => array('name' => 'name', 'value' => $role_name, 'operand' => '='),
+		'relationship' => 'has_role',
+		'relationship_guid' => $user->guid,
+	);
+	$roles = elgg_get_entities_from_relationship($options);
+
+
+	if (is_array($roles) && !empty($roles)) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * Assign a role to a particular user
  *
  * @param ElggRole $role
