@@ -14,9 +14,6 @@ $english = array(
 	'roles:role:DEFAULT_ROLE' => 'Member',
 	'roles:role:ADMIN_ROLE' => 'Administrator',
 	
-	'roles:nd:affiliate' => 'Affiliate',
-	'roles:nd:adherent' => 'Adherent',
-
 	'user:role:label' => 'Select role',
 
 	'user:role:success' => 'User role has been successfully updated',

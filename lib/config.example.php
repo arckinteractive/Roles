@@ -33,7 +33,7 @@ replace: Replaces an existing item. Works for views, menus and hooks.
 redirect: Redirects to another page. Works for pages.
  */
 
-function roles_get_roles_config() {
+function roles_get_roles_config($hook_name, $entity_type, $return_value, $params) {
 
 	$roles = array(
 
@@ -56,5 +56,9 @@ function roles_get_roles_config() {
 		)
 	);
 
-	return $roles;
+	if (!is_array($return_value)) {
+		return $roles;
+	} else {
+		return array_merge($return_value, $roles);
+	}
 }

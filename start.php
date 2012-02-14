@@ -22,6 +22,7 @@ function roles_init() {
 	elgg_load_library('roles');
 	elgg_load_library('roles_config');
 
+	// Provide default roles by own handler. This should be extended by site specific handlers
 	elgg_register_plugin_hook_handler('roles:config', 'role', 'roles_get_roles_config');
 
 	// Catch all actions and page route requests
@@ -38,8 +39,9 @@ function roles_init() {
 
 }
 
-function roles_register_views_hook_handler($hook_name, $entity_type, $return_value, $params) {
+function roles_register_views() {
 	$role = roles_get_role();
+	error_log('role: ' . print_r($role, 1));
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'views');
 		if (is_array($role_perms) && !empty($role_perms)) {
@@ -50,6 +52,7 @@ function roles_register_views_hook_handler($hook_name, $entity_type, $return_val
 						break;
 					case 'extend':
 						$params = $perm_details['view_extension'];
+						error_log(print_r($params, 1));
 						$view_extension = $params['view'];
 						$priority = isset($params['priority']) ? $params['priority'] : 501;
 						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
@@ -225,7 +228,7 @@ function roles_hooks_permissions($event, $type, $object) {
 
 function roles_update_checker($event, $type, $object) {
 	roles_check_update();
-	roles_register_views_hook_handler();
+	roles_register_views();
 }
 
 
