@@ -14,28 +14,23 @@
 function roles_get_role($user = null) {
 	
 	$user = $user ? $user : elgg_get_logged_in_user_entity();
-	if (!elgg_instanceof($user, 'user')) {
-		return false;
-	}
-	
-	$options = array(
-		'type' => 'object',
-		'subtype' => 'role',
-		'relationship' => 'has_role',
-		'relationship_guid' => $user->guid,
-	);
-	$roles = elgg_get_entities_from_relationship($options);
 
+	if (elgg_instanceof($user, 'user')) {
+		$options = array(
+			'type' => 'object',
+			'subtype' => 'role',
+			'relationship' => 'has_role',
+			'relationship_guid' => $user->guid,
+		);
+		$roles = elgg_get_entities_from_relationship($options);
 
-	if (is_array($roles) && !empty($roles)) {
-		return $roles[0];
-	} else {
-		if ($user->isAdmin()) {
-			return roles_get_role_by_name(ADMIN_ROLE);
-		} else {
-			return roles_get_role_by_name(DEFAULT_ROLE);
+		if (is_array($roles) && !empty($roles)) {
+			return $roles[0];
 		}
 	}
+	
+	// Couldn't find role for the current user, or there is no logged in user
+	return roles_get_role_by_name(roles_filter_role_name(NO_ROLE));
 }
 
 /**
@@ -116,6 +111,24 @@ function roles_get_all_roles() {
 	);
 	return elgg_get_entities($options);
 
+}
+
+function roles_get_all_selectable_roles() {
+	
+	$dbprefix = elgg_get_config('dbprefix');
+	$reserved_role_names = "('" . implode("','", ElggRole::getReservedRoleNames()) ."')";
+	$options = array(
+		'type' => 'object',
+		'subtype' => 'role',
+		'limit' => 0,
+		'joins' => array(
+			"INNER JOIN {$dbprefix}metadata m ON (m.entity_guid = e.guid)",
+			"INNER JOIN {$dbprefix}metastrings s1 ON (s1.id = m.name_id AND s1.string = 'name')",
+			"INNER JOIN {$dbprefix}metastrings s2 ON (s2.id = m.value_id)",
+		),
+		'wheres' => array("s2.string NOT IN $reserved_role_names")
+	);
+	return elgg_get_entities($options);
 }
 
 /**
@@ -218,6 +231,20 @@ function roles_get_role_by_name($role_name) {
 		return false;
 	}
 	
+}
+
+function roles_filter_role_name($role_name) {
+	if ($role_name !== NO_ROLE) {
+		return $role_name;
+	}
+	
+	if (!elgg_is_logged_in()) {
+		return VISITOR_ROLE;
+	} else if (elgg_is_admin_logged_in()) {
+		return ADMIN_ROLE;
+	} else {
+		return DEFAULT_ROLE;
+	}
 }
 
 /**

@@ -11,9 +11,11 @@ $english = array(
 
 	'user:set:role' => 'Role settings',
 	
+	'roles:role:VISITOR_ROLE' => 'Visitor',
 	'roles:role:DEFAULT_ROLE' => 'Member',
 	'roles:role:ADMIN_ROLE' => 'Administrator',
-	
+	'roles:role:NO_ROLE' => 'No specific role',
+
 	'user:role:label' => 'Select role',
 
 	'user:role:success' => 'User role has been successfully updated',

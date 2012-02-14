@@ -11,6 +11,23 @@ class ElggRole extends ElggObject {
 	public function __construct($guid = null) {
 		parent::__construct($guid);
 	}
+	
+
+	
+	public static function getReservedRoleNames() {
+		return array(DEFAULT_ROLE, ADMIN_ROLE, VISITOR_ROLE);
+	}
+	
+	public static function isReservedRoleName($role_name) {
+		return in_array($role_name, ElggRole::getReservedRoleNames());
+	}
+	
+
+	
+	public function isReservedRole() {
+		return ElggRole::isReservedRoleName($this->name);
+	}
+	
 
 	/**
 	 * Obtain a list of users for the current role object

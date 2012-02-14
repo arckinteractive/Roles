@@ -8,14 +8,15 @@
 
 $user = elgg_get_page_owner_entity();
 $current_role = roles_get_role($user);
-if (elgg_instanceof($current_role, 'object', 'role')) {
-	$current_role_name = $current_role->name;
+if ($current_role->isReservedRole()) {
+	$current_role_name = NO_ROLE;
 } else {
-	$current_role_name = DEFAULT_ROLE;
+	$current_role_name = $current_role->name;
 }
 
-$all_roles = roles_get_all_roles();
-$roles_options = array();
+$roles_options = array(NO_ROLE => elgg_echo('roles:role:NO_ROLE'));
+
+$all_roles = roles_get_all_selectable_roles();
 if (is_array($all_roles) && !empty($all_roles)) {
 	foreach ($all_roles as $role) {
 		$roles_options[$role->name] = $role->title;

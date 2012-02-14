@@ -9,8 +9,10 @@
  * @link http://www.arckinteractive.com/
  */
 
-define('DEFAULT_ROLE', '_default_');
-define('ADMIN_ROLE', '_admin_');
+define('DEFAULT_ROLE', 'default');
+define('ADMIN_ROLE', 'admin');
+define('VISITOR_ROLE', 'visitor');
+define('NO_ROLE', '_no_role_');
 
 elgg_register_event_handler('init', 'system', 'roles_init');
 
@@ -22,7 +24,7 @@ function roles_init() {
 	elgg_load_library('roles');
 	elgg_load_library('roles_config');
 
-	// Provide default roles by own handler. This should be extended by site specific handlers
+	// Provides default roles by own handler. This should be extended by site specific handlers
 	elgg_register_plugin_hook_handler('roles:config', 'role', 'roles_get_roles_config');
 
 	// Catch all actions and page route requests
@@ -51,7 +53,6 @@ function roles_register_views() {
 						break;
 					case 'extend':
 						$params = $perm_details['view_extension'];
-						error_log(print_r($params, 1));
 						$view_extension = $params['view'];
 						$priority = isset($params['priority']) ? $params['priority'] : 501;
 						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
@@ -235,6 +236,7 @@ function roles_user_settings_save($hook_name, $entity_type, $return_value, $para
 	$role_name = get_input('role');
 	$user_id = get_input('guid');
 
+	$role_name = roles_filter_role_name($role_name);
 	$role = roles_get_role_by_name($role_name);
 	$user = get_entity($user_id);
 

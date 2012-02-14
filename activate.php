@@ -17,7 +17,8 @@ foreach($roles as $role) {
 	$role->delete();
 }
 
-roles_create_from_config();
+$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
+roles_create_from_config($roles_array);
 
 
 ?>

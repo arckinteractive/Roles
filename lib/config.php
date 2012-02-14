@@ -3,8 +3,14 @@
 function roles_get_roles_config($hook_name, $entity_type, $return_value, $params) {
 
 	$roles = array(
+		VISITOR_ROLE => array(
+			'name' => 'roles:role:VISITOR_ROLE',
+			'extends' => array(),
+			'permissions' => array(
+			),
+		),
 		DEFAULT_ROLE => array(
-			'name' => 'roles:DEFAULT_ROLE',
+			'name' => 'roles:role:DEFAULT_ROLE',
 			'extends' => array(),
 			'permissions' => array(
 				'actions' => array(
@@ -18,7 +24,7 @@ function roles_get_roles_config($hook_name, $entity_type, $return_value, $params
 			),
 		),
 		ADMIN_ROLE => array(
-			'name' => 'roles:ADMIN_ROLE',
+			'name' => 'roles:role:ADMIN_ROLE',
 			'extends' => array(),
 			'permissions' => array(
 				'actions' => array(
