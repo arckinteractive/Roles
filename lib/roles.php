@@ -193,8 +193,8 @@ function roles_get_role_by_name($role_name) {
  */
 
 function roles_create_from_config() {
-	$roles_array = roles_get_roles_config();
-	
+	$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
+		
 	$options = array(
 			'type' => 'object',
 			'subtype' => 'role',
@@ -242,7 +242,7 @@ function roles_create_from_config() {
 
 function roles_check_update() {
 	$hash = elgg_get_plugin_setting('roles_hash');
-	$roles_array = roles_get_roles_config();
+	$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
 	
 	$current_hash = sha1(serialize($roles_array));
 

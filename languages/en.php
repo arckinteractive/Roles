@@ -11,7 +11,9 @@ $english = array(
 
 	'user:set:role' => 'Role settings',
 	
-	'roles:nd:DEFAULT_ROLE' => 'Member',
+	'roles:role:DEFAULT_ROLE' => 'Member',
+	'roles:role:ADMIN_ROLE' => 'Administrator',
+	
 	'roles:nd:affiliate' => 'Affiliate',
 	'roles:nd:adherent' => 'Adherent',
 

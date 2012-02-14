@@ -8,7 +8,9 @@
  * @copyright Arck Interactive, LLC 2011
  * @link http://www.arckinteractive.com/
  */
+
 define('DEFAULT_ROLE', '_default_');
+define('ADMIN_ROLE', '_admin_');
 
 elgg_register_event_handler('init', 'system', 'roles_init');
 
@@ -20,19 +22,23 @@ function roles_init() {
 	elgg_load_library('roles');
 	elgg_load_library('roles_config');
 
-	roles_check_update();
+	elgg_register_plugin_hook_handler('roles:config', 'role', 'roles_get_roles_config');
 
+	// Catch all actions and page route requests
 	elgg_register_plugin_hook_handler('action', 'all', 'roles_actions_permissions');
 	elgg_register_plugin_hook_handler('route', 'all', 'roles_pages_permissions');
 
 	elgg_register_event_handler('pagesetup', 'system', 'roles_menus_permissions');
+
+	// 
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 
-	roles_register_views_hook_handler();
+	// Check for role configuration updates 
+	elgg_register_event_handler('ready', 'system', 'roles_update_checker');
 
 }
 
-function roles_register_views_hook_handler() {
+function roles_register_views_hook_handler($hook_name, $entity_type, $return_value, $params) {
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'views');
@@ -215,6 +221,13 @@ function roles_hooks_permissions($event, $type, $object) {
 
 	return true;
 }
+
+
+function roles_update_checker($event, $type, $object) {
+	roles_check_update();
+	roles_register_views_hook_handler();
+}
+
 
 function roles_user_settings_save($hook_name, $entity_type, $return_value, $params) {
 	$role_name = get_input('role');
