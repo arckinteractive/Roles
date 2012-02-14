@@ -41,7 +41,6 @@ function roles_init() {
 
 function roles_register_views() {
 	$role = roles_get_role();
-	error_log('role: ' . print_r($role, 1));
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'views');
 		if (is_array($role_perms) && !empty($role_perms)) {
