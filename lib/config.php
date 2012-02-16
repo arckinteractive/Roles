@@ -30,6 +30,10 @@ function roles_get_roles_config($hook_name, $entity_type, $return_value, $params
 				'actions' => array(
 				),
 				'menus' => array(
+					'filter:mine' => array(
+						'rule' => 'deny',
+						'context' => array('bookmarks')
+					)
 				),
 				'views' => array(
 				),

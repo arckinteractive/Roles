@@ -363,6 +363,25 @@ function roles_debug_menu($menu_name) {
 	error_log("Menu $menu_name has elements: " . implode(',', $item_names));
 }
 
+function roles_debug_menu_vars($menu_vars) {
+	$item_names = array();
+	
+	if (is_array($menu_vars)) {
+		foreach($menu_vars as $section => $menu_items) {
+			foreach($menu_items as $menu_item) {
+				$item_names[] = $menu_item->getName();
+			}
+		}
+	}
+	error_log("Menu vars has elements: " . implode(',', $item_names));
+}
+
+function roles_get_menu($menu_name) {
+	global $CONFIG;
+	return $CONFIG->menus[$menu_name];	
+}
+
+
 
 function roles_replace_dynamic_paths($str) {
 	$user = elgg_get_logged_in_user_entity();
@@ -395,7 +414,7 @@ function roles_replace_dynamic_paths($str) {
 function roles_check_context($permission_details, $strict = false) {
 	global $CONFIG;
 	$result = true;
-	if (is_array($perm_details['context'])) { 
+	if (is_array($permission_details['context'])) { 
 		if ($strict) {
 			$result = in_array(elgg_get_contex(), $permission_details['context']);
 		} else {
