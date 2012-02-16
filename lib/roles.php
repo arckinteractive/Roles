@@ -382,9 +382,11 @@ function roles_replace_dynamic_paths($str) {
 	if (elgg_instanceof($pageowner, 'user')) {
 		$pageowner_username = $pageowner->username;
 		$pageowner_guid = $pageowner->guid;
+		$pageowner_role = roles_get_role($pageowner);
 		
 		$res = str_replace('{$pageowner_name}', $pageowner_username, $res);
 		$res = str_replace('{$pageowner_guid}', $pageowner_guid, $res);
+		$res = str_replace('{$pageowner_rolename}', $pageowner_role->name, $res);
 	}
 	
 	return $res;

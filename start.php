@@ -54,14 +54,14 @@ function roles_register_views() {
 						break;
 					case 'extend':
 						$params = $perm_details['view_extension'];
-						$view_extension = $params['view'];
+						$view_extension = roles_replace_dynamic_paths($params['view']);
 						$priority = isset($params['priority']) ? $params['priority'] : 501;
 						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
 						elgg_extend_view($view, $view_extension, $priority, $viewtype);
 						break;
 					case 'replace':
 						$params = $perm_details['view_replacement'];
-						$location = elgg_get_root_path() . $params['location'];
+						$location = elgg_get_root_path() . roles_replace_dynamic_paths($params['location']);
 						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
 						elgg_set_view_location($view, $location, $viewtype);
 						break;
