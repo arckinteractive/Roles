@@ -31,9 +31,10 @@ function roles_init() {
 	elgg_register_plugin_hook_handler('action', 'all', 'roles_actions_permissions');
 	elgg_register_plugin_hook_handler('route', 'all', 'roles_pages_permissions');
 
-	elgg_register_event_handler('pagesetup', 'system', 'roles_menus_permissions');
-
-	// 
+	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
+	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999); 
+	
+	// Set up roles based hooks 
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 
 	// Check for role configuration updates 
@@ -110,7 +111,56 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 	}
 }
 
-function roles_menus_permissions($event, $type, $object) {
+function roles_menus_permissions($hook, $type, $return_value, $params) {
+
+	// Ignore all triggered hooks except for 'menu:menu_name' type
+	list($hook_type, $prepared_menu_name) = explode(':', $type);
+
+	if (($hook_type == 'menu') && !empty($prepared_menu_name)) {
+		$role = roles_get_role();
+		if (elgg_instanceof($role, 'object', 'role')) {
+			$role_perms = roles_get_role_permissions($role, 'menus');
+			if (is_array($role_perms) && !empty($role_perms)) {
+
+				foreach ($role_perms as $menu => $perm_details) {
+
+					list($menu_name, $item_name) = explode('::', $menu);
+
+					// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
+					if (($menu_name == $prepared_menu_name) && roles_check_context($perm_details)) {
+
+						// Need to act on this permission rule
+						switch ($perm_details['rule']) {
+							case 'deny':
+								list($menu_name, $item_name) = explode('::', $menu);
+								roles_debug_menu($menu_name);
+								elgg_unregister_menu_item($menu_name, $item_name);
+								roles_debug_menu($menu_name);
+								break;
+							case 'extend':
+								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+								$menu_obj = ElggMenuItem::factory($menu_item);
+								elgg_register_menu_item($menu, $menu_obj);
+								break;
+							case 'replace':
+								list($menu_name, $item_name) = explode('::', $menu);
+								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+								$menu_obj = ElggMenuItem::factory($menu_item);
+								roles_replace_menu($menu_name, $item_name, $menu_obj);
+								break;
+							case 'allow':
+							default:
+								break;
+						}
+					}					
+				}
+			}
+		}
+	}
+}
+
+
+function __roles_menus_permissions($event, $type, $object) {
 
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
