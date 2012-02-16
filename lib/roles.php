@@ -351,31 +351,6 @@ function roles_prepare_menu_vars($vars) {
 	return $prepared_vars;
 }
 
-function roles_debug_menu($menu_name) {
-	global $CONFIG;
-	$item_names = array();
-	
-	if (is_array($CONFIG->menus[$menu_name])) {
-		foreach($CONFIG->menus[$menu_name] as $menu_item) {
-			$item_names[] = $menu_item->getName();
-		}
-	}
-	error_log("Menu $menu_name has elements: " . implode(',', $item_names));
-}
-
-function roles_debug_menu_vars($menu_vars) {
-	$item_names = array();
-	
-	if (is_array($menu_vars)) {
-		foreach($menu_vars as $section => $menu_items) {
-			foreach($menu_items as $menu_item) {
-				$item_names[] = $menu_item->getName();
-			}
-		}
-	}
-	error_log("Menu vars has elements: " . implode(',', $item_names));
-}
-
 function roles_get_menu($menu_name) {
 	global $CONFIG;
 	return $CONFIG->menus[$menu_name];	
@@ -424,6 +399,4 @@ function roles_check_context($permission_details, $strict = false) {
 	return $result;
 }
 
-
-
-
+?>

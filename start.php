@@ -34,9 +34,10 @@ function roles_init() {
 	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
 	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999); 
 	
-	// Set up roles based hooks 
+	// Set up roles based hooks and event listener, after all plugin is initialized
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
-
+	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
+	
 	// Check for role configuration updates 
 	elgg_register_event_handler('ready', 'system', 'roles_update_checker');
 
@@ -229,6 +230,54 @@ function roles_hooks_permissions($event, $type, $object) {
 						$priority = isset($params['priority']) ? $params['priority'] : 500;
 						elgg_unregister_plugin_hook_handler($hook_name, $type, $old_handler);
 						elgg_register_plugin_hook_handler($hook_name, $type, $new_handler, $priority);
+						break;
+					case 'allow':
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+
+function roles_events_permissions($event, $type, $object) {
+
+	$role = roles_get_role();
+	if (elgg_instanceof($role, 'object', 'role')) {
+		$role_perms = roles_get_role_permissions($role, 'events');
+		if (is_array($role_perms) && !empty($role_perms)) {
+			foreach ($role_perms as $event => $perm_details) {
+				list($event_name, $type) = explode('::', $event);
+				if (!$type) {
+					$type = 'all';
+				}
+				switch ($perm_details['rule']) {
+					case 'deny':
+						$params = $perm_details['event'];
+						if (is_array($params)) {
+							$handler = $params['handler'];
+							elgg_unregister_event_handler($event_name, $type, $handler);
+						} else {
+							global $CONFIG;
+							unset($CONFIG->events[$event_name][$type]);
+						}
+						break;
+					case 'extend':
+						$params = $perm_details['event'];
+						$handler = $params['handler'];
+						$priority = isset($params['priority']) ? $params['priority'] : 500;
+						elgg_register_event_handler($event_name, $type, $handler, $priority);
+						break;
+					case 'replace':
+						$params = $perm_details['hook'];
+						$old_handler = $params['old_handler'];
+						$new_handler = $params['new_handler'];
+						$priority = isset($params['priority']) ? $params['priority'] : 500;
+						elgg_unregister_event_handler($event_name, $type, $old_handler);
+						elgg_register_event_handler($event_name, $type, $new_handler, $priority);
 						break;
 					case 'allow':
 					default:
