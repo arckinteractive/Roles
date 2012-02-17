@@ -270,14 +270,14 @@ function roles_create_from_config($roles_array) {
 		$current_role = $existing_roles[$rname];
 		if (elgg_instanceof($current_role, 'object', 'role')) {
 			// Update existing role obejct
-			$current_role->title = elgg_echo($rdetails['name']);
+			$current_role->title = elgg_echo($rdetails['title']);
 			$current_role->extends = $rdetails['extends'];
 			$current_role->permissions = serialize($rdetails['permissions']);
 			$current_role->save();
 		} else {
 			// Create new role object
 			$new_role = new ElggRole();
-			$new_role->title = elgg_echo($rdetails['name']);
+			$new_role->title = elgg_echo($rdetails['title']);
 			$new_role->owner_guid = elgg_get_logged_in_user_guid();
 			$new_role->container_guid = $new_role->owner_guid;
 			$new_role->access_id = ACCESS_PUBLIC;
@@ -368,7 +368,7 @@ function roles_replace_dynamic_paths($str) {
 		$res = str_replace('{$self_username}', $self_username, $str); 
 		$res = str_replace('{$self_guid}', $self_guid, $res);
 		if (elgg_instanceof($role, 'object', 'role')) {
-			$res = str_replace('{$self_rolename}', $role->name, $str);
+			$res = str_replace('{$self_rolename}', $role->name, $es);
 		} 
 	}
 
