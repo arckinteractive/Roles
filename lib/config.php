@@ -1,5 +1,20 @@
 <?php
 
+/**
+ * 
+ * Provides the default roles configuration array. Triggered by the 'roles:config' hook.
+ * 
+ * When implementing specific roles, authors should register for the same hook their handler.
+ * The handler should merge new role values into the existing configuration array
+ * Examples of this can be seen in the roles_moderators and roles_group_amins plugins
+ * 
+ * @param string $hook_name Equals "roles:config"
+ * @param string $entity_type Equals "role"
+ * @param mixed $return_value The array of already initialized role configuration values
+ * @param mixed $params Not in use
+ * 
+ * @return array The role configuration
+ */
 function roles_get_roles_config($hook_name, $entity_type, $return_value, $params) {
 
 	$roles = array(
