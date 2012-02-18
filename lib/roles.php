@@ -386,6 +386,19 @@ function roles_replace_dynamic_paths($str) {
 	return $res;
 }
 
+
+function roles_path_match($rule, $path) {
+	if (preg_match('/^regexp\((.+)\)$/', $rule) > 0) {
+		// The rule contains regular expression; use regexp matching for the current path
+		$pattern = preg_replace('/^regexp\(/', '', $rule);
+		$pattern = preg_replace('/\)$/', '', $pattern);
+		return preg_match($pattern, $path);
+	} else {
+		// The rule contains a simple string; default string comparision will be used
+		return ($rule == $path);
+	}
+}
+
 function roles_check_context($permission_details, $strict = false) {
 	global $CONFIG;
 	$result = true;
