@@ -368,7 +368,7 @@ function roles_replace_dynamic_paths($str) {
 		$res = str_replace('{$self_username}', $self_username, $str); 
 		$res = str_replace('{$self_guid}', $self_guid, $res);
 		if (elgg_instanceof($role, 'object', 'role')) {
-			$res = str_replace('{$self_rolename}', $role->name, $es);
+			$res = str_replace('{$self_rolename}', $role->name, $res);
 		} 
 	}
 

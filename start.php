@@ -54,8 +54,8 @@ function roles_init($event, $type, $object) {
 	// Check for role configuration updates 
 	elgg_register_event_handler('ready', 'system', 'roles_check_update');
 	
+	// Set up roles based view management
 	elgg_register_event_handler('ready', 'system', 'roles_register_views');
-	
 
 }
 
@@ -70,8 +70,12 @@ function roles_init($event, $type, $object) {
  * to return an empty string instead of the view's original output. This is to conserve resources - 
  * there are hundreds of views contributing to any elgg page. Listening for all "views", "all" hooks would
  * be quite a waste.
- */
-function roles_register_views() {
+ * 
+ * @param string $event Equals 'ready'
+ * @param string $event_type Equals 'system'
+ * @param mixed $object Not in use for this specific listener
+*/
+function roles_register_views($event, $type, $object) {
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'views');
