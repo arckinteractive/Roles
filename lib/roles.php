@@ -1,16 +1,22 @@
 <?php
+
 /**
- * @package roles
- * @note The intention of this module is that plugin authors should be able to develop most functionality without the explicit need of knowing a user’s certain role. Most of role based functionality – i.e. what the user can see and interact with – can be moved to the configuration array; hence no need for handling role based conditionals in the code.
+ * 
+ * Roles library functions
+ *
+ * @package Roles
+ * @author Andras Szepeshazi
+ * @copyright Arck Interactive, LLC 2012
+ * @link http://www.arckinteractive.com/
  */
 
 /**
- * Obtain a role of a given user
+ * Obtains the role of a given user
  * 
  * @param ElggUser $user
- * @return ElggRole 
- */
 
+ * @return ElggRole The role the user belongs to 
+ */
 function roles_get_role($user = null) {
 	
 	$user = $user ? $user : elgg_get_logged_in_user_entity();
@@ -34,12 +40,12 @@ function roles_get_role($user = null) {
 }
 
 /**
- * Check if the user has a specific role
+ * Checks if the user has a specific role
  *
  * @param ElggUser $user
- * @return bool
- */
 
+ * @return bool True if the user belongs to the passed role, false otherwise
+ */
 function roles_has_role($user = null, $role_name = DEFAULT_ROLE) {
 
 	$user = $user ? $user : elgg_get_logged_in_user_entity();
@@ -64,11 +70,12 @@ function roles_has_role($user = null, $role_name = DEFAULT_ROLE) {
 }
 
 /**
- * Assign a role to a particular user
+ * Assigns a role to a particular user
  *
- * @param ElggRole $role
- * @param ElggUser $user
- * @return bool
+ * @param ElggRole $role The role to be assigned
+ * @param ElggUser $user The user the role needs to be assigned to
+
+ * @return mixed True if the role change was successful, false if could not update user role, and null if there was no change in user role
  */
 
 function roles_set_role($role, $user = null) {
@@ -96,9 +103,9 @@ function roles_set_role($role, $user = null) {
 }
 
 /**
- * Get all role objects
+ * Gets all role objects
  *
- * @return mixed
+ * @return mixed An array of ElggRole objects defined in the system, or false if none found
  */
 
 function roles_get_all_roles() {
@@ -113,6 +120,14 @@ function roles_get_all_roles() {
 
 }
 
+/**
+ * 
+ * Gets all non-default role objects
+ * This is used by the role selector view. Default roles (VISITOR_ROLE, ADMIN_ROLE, DEFAULT_ROLE) need to be omitted from
+ * the list of selectable roles - as default roles are automatically assigned to users based on their Elgg membership type  
+ * 
+ * @return mixed An array of non-default ElggRole objects defined in the system, or false if none found
+ */
 function roles_get_all_selectable_roles() {
 	
 	$dbprefix = elgg_get_config('dbprefix');
@@ -132,12 +147,13 @@ function roles_get_all_selectable_roles() {
 }
 
 /**
- * Obtain a list of permissions associated with a particular role object
+ * Obtains a list of permissions associated with a particular role object
  *
- * @global array $PERMISSIONS_CACHE
- * @param ElggRole $role
- * @param string $permission_type
- * @return mixed
+ * @global array $PERMISSIONS_CACHE In-memory cache for role permission
+ * @param ElggRole $role The role to check for permissions
+ * @param string $permission_type The section from the configuration array ('actions', 'menus', 'views', etc.)
+ * 
+ * @return array The permission rules for the given role and permission type
  */
 
 function roles_get_role_permissions($role = null, $permission_type = null) {
@@ -161,12 +177,10 @@ function roles_get_role_permissions($role = null, $permission_type = null) {
 }
 
 /**
- * Cache permissions associated with a role object
+ * Caches permissions associated with a role object. Also resolves all role extensions.
  *
- * @global array $PERMISSIONS_CACHE
- * @param ElggRole $role
- *
- * @return void
+ * @global array $PERMISSIONS_CACHE In-memory cache for role permission
+ * @param ElggRole $role The role to cache permissions for
  */
 
 function roles_cache_permissions($role) {
@@ -211,10 +225,11 @@ function roles_cache_permissions($role) {
 }
 
 /**
- * Get a role object based on it's name
+ * Gets a role object based on it's name
  *
- * @param string $role_name
- * @return mixed
+ * @param string $role_name The name of the role
+
+ * @return mixed An ElggRole object if it could be found based on the name, false otherwise
  */
 
 function roles_get_role_by_name($role_name) {
@@ -233,6 +248,11 @@ function roles_get_role_by_name($role_name) {
 	
 }
 
+/**
+ * Resolves the default role for the currently logged in user
+
+ * @param string $role_name The name uf the user's role
+ */
 function roles_filter_role_name($role_name) {
 	if ($role_name !== NO_ROLE) {
 		return $role_name;
@@ -248,9 +268,13 @@ function roles_filter_role_name($role_name) {
 }
 
 /**
- * Process the configuration file and generate ElggRole objects
+ * Processes the configuration files and generates the appropriate ElggRole objects.
+ * 
+ * If, for any role definition, there is an already existing role with the same name, 
+ * the role permissions will be updated for the given role object.
+ * If there is no previously existing, corresponding role object, it will be created now. 
  *
- * @return void
+ * @param array $roles_array The roles configuration array
  */
 
 function roles_create_from_config($roles_array) {
@@ -295,11 +319,9 @@ function roles_create_from_config($roles_array) {
 }
 
 /**
- * Check if the configuration array has been updated and updates roles accordingly if needed
+ * Checks if the configuration array has been updated and updates role objects accordingly if needed
  *
- * @return void
  */
-
 function roles_check_update() {
 	$hash = elgg_get_plugin_setting('roles_hash');
 	$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
@@ -313,8 +335,14 @@ function roles_check_update() {
 }
 
 
-/******************* Helper functions for menu operations ***********************/
-
+/**
+ * 
+ * Replaces an existing menu item with a new one
+ * 
+ * @param string $menu_name The menu name ('site', 'filter', etc.)
+ * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
+ * @param ElggMenuItem $menu_obj The replacement menu item
+ */
 function roles_replace_menu($menu_name, $item_name, $menu_obj) {
 	global $CONFIG;
 
@@ -323,6 +351,15 @@ function roles_replace_menu($menu_name, $item_name, $menu_obj) {
 	}
 }
 
+/**
+ * 
+ * Finds the index of a menu item in the menu array
+ * 
+ * @param string $menu_name The menu name ('site', 'filter', etc.)
+ * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
+ * 
+ * @return int The index of the menu item in the menu array
+ */
 function roles_find_menu_index($menu_name, $item_name) {
 	global $CONFIG;
 	$index = -1;
@@ -341,6 +378,14 @@ function roles_find_menu_index($menu_name, $item_name) {
 }
 
 
+/**
+ * 
+ * Substitutes dynamic parts of a menu's target URL
+ *  
+ * @param array $vars An associative array holding the menu permissions
+ * 
+ * @return The substituted menu permission array
+ */
 function roles_prepare_menu_vars($vars) {
 	
 	$prepared_vars = $vars;
@@ -351,13 +396,29 @@ function roles_prepare_menu_vars($vars) {
 	return $prepared_vars;
 }
 
+
+/**
+ * 
+ * Gets a menu by name
+ * 
+ * @param string $menu_name The name of the menu
+ * 
+ * @return array The array of ElggMenuItem objects from the menu
+ */
 function roles_get_menu($menu_name) {
 	global $CONFIG;
 	return $CONFIG->menus[$menu_name];	
 }
 
 
-
+/**
+ * 
+ * Replaces certain parts of path and URL type definitions with dynamic values
+ * 
+ * @param string $str The string to operate on
+ * 
+ * @return string The updated, substituted string
+ */
 function roles_replace_dynamic_paths($str) {
 	$user = elgg_get_logged_in_user_entity();
 	if (elgg_instanceof($user, 'user')) {
@@ -387,6 +448,15 @@ function roles_replace_dynamic_paths($str) {
 }
 
 
+/**
+ * 
+ * Checks if a path or URL type rule matches a given path. Also processes regular expressions
+ * 
+ * @param string $rule The permission rule to check
+ * @param string $path The path to match against
+ * 
+ * @return boolean True if the rule matches the path, false otherwise
+ */
 function roles_path_match($rule, $path) {
 	if (preg_match('/^regexp\((.+)\)$/', $rule) > 0) {
 		// The rule contains regular expression; use regexp matching for the current path
@@ -399,6 +469,17 @@ function roles_path_match($rule, $path) {
 	}
 }
 
+/**
+ * 
+ * Checks if a permission rule should be executed for the current context
+ * 
+ * @param string $permission_details The permission rule configuration
+ * @param boolean $strict	If strict context matching should be used.
+ * 							If true, only the last context will be checked for the rule matching. 
+ * 							If false, any context value in the context stack will be considered.
+ * 
+ * @return True if the rule should be executed, false otherwise
+ */
 function roles_check_context($permission_details, $strict = false) {
 	global $CONFIG;
 	$result = true;

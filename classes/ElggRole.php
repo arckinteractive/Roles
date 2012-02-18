@@ -3,7 +3,11 @@
 /**
  * 
  * Class to implement Role objects
- * @author szepeshazi
+ * 
+ * @package Roles
+ * @author Andras Szepeshazi
+ * @copyright Arck Interactive, LLC 2012
+ * @link http://www.arckinteractive.com/
  *
  */
 class ElggRole extends ElggObject {
