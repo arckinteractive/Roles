@@ -485,7 +485,7 @@ function roles_check_context($permission_details, $strict = false) {
 	$result = true;
 	if (is_array($permission_details['context'])) { 
 		if ($strict) {
-			$result = in_array(elgg_get_contex(), $permission_details['context']);
+			$result = in_array(elgg_get_context(), $permission_details['context']);
 		} else {
 			$result = count(array_intersect($permission_details['context'], $CONFIG->context)) > 0;
 		}

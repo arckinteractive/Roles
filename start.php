@@ -226,6 +226,7 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 			}
 		}
 	}
+	return $return_value;
 }
 
 /**
