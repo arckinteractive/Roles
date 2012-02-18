@@ -4,10 +4,10 @@
 	<author>Andras Szepeshazi - Arck Interactive, LLC</author>
 	<version>1.0.0</version>
 	<blurb>User roles</blurb>
-	<description>Implements user roles.</description>
+	<description>Implements a generic roles framework to allow creating custom user roles.</description>
 	<website>http://www.arckinteractive.com/</website>
-	<copyright>(C) Arck Interactive, LLC 2010</copyright>
-	<license>Arck proprietary licence</license>
+	<copyright>(C) Arck Interactive, LLC 2012</copyright>
+	<license>GNU General Public License version 2</license>
 	<requires>
 		<type>elgg_release</type>
 		<version>1.8</version>
