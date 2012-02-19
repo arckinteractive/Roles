@@ -196,11 +196,9 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 
 					// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
 					if (($menu_name == $prepared_menu_name) && roles_check_context($perm_details)) {
-
 						// Need to act on this permission rule
 						switch ($perm_details['rule']) {
 							case 'deny':
-								list($menu_name, $item_name) = explode('::', $menu);
 								elgg_unregister_menu_item($menu_name, $item_name);
 								break;
 							case 'extend':
@@ -209,7 +207,6 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 								elgg_register_menu_item($menu, $menu_obj);
 								break;
 							case 'replace':
-								list($menu_name, $item_name) = explode('::', $menu);
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
 								roles_replace_menu($menu_name, $item_name, $menu_obj);

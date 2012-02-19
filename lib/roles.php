@@ -185,7 +185,6 @@ function roles_get_role_permissions($role = null, $permission_type = null) {
 
 function roles_cache_permissions($role) {
 	global $PERMISSIONS_CACHE;
-
 	if (!is_array($PERMISSIONS_CACHE[$role->name])) {
 		$PERMISSIONS_CACHE[$role->name] = array();
 	}
