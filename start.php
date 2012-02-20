@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  * Roles plugin
  *
  * @package Roles
@@ -11,7 +11,7 @@
  */
 
 /**
- * 
+ *
  * Default role constants definitions
  */
 define('DEFAULT_ROLE', 'default');
@@ -20,13 +20,13 @@ define('VISITOR_ROLE', 'visitor');
 define('NO_ROLE', '_no_role_');
 
 /**
- * 
+ *
  * Register Roles plugin's init function
  */
 elgg_register_event_handler('init', 'system', 'roles_init');
 
 /**
- * 
+ *
  * Initializes the Roles plugin
  */
 function roles_init($event, $type, $object) {
@@ -45,32 +45,32 @@ function roles_init($event, $type, $object) {
 	elgg_register_plugin_hook_handler('route', 'all', 'roles_pages_permissions');
 
 	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
-	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999); 
-	
+	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999);
+
 	// Set up roles based hooks and event listener, after all plugin is initialized
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
-	
-	// Check for role configuration updates 
+
+	// Check for role configuration updates
 	elgg_register_event_handler('ready', 'system', 'roles_check_update');
-	
+
 	// Set up roles based view management
 	elgg_register_event_handler('ready', 'system', 'roles_register_views');
 
 }
 
 /**
- * 
+ *
  * Processes view permissions from the role configuration array. This is called after the 'ready', 'system' event.
- * 
- * For view extension and replacements the function simply calls the corresponding {@link elgg_extend_view()} and 
+ *
+ * For view extension and replacements the function simply calls the corresponding {@link elgg_extend_view()} and
  * {@link elgg_set_view_location()} functions, to post-register views after all plugins have been initalized.
- * 
- * For suppressing views (by using the "deny" rule), it registers a specific handler for the given view, 
- * to return an empty string instead of the view's original output. This is to conserve resources - 
+ *
+ * For suppressing views (by using the "deny" rule), it registers a specific handler for the given view,
+ * to return an empty string instead of the view's original output. This is to conserve resources -
  * there are hundreds of views contributing to any elgg page. Listening for all "views", "all" hooks would
  * be quite a waste.
- * 
+ *
  * @param string $event Equals 'ready'
  * @param string $event_type Equals 'system'
  * @param mixed $object Not in use for this specific listener
@@ -108,15 +108,15 @@ function roles_register_views($event, $type, $object) {
 }
 
 /**
- * 
+ *
  * A hook handler registered by {@link roles_register_views()} to suppress the outputs of certain views defined by
  * the role configuration array.
- * 
+ *
  * @param string $hook_name Equals "view"
  * @param string $type The view name
  * @param mixed $return_value The original view output
  * @param mixed $params An associative array of parameters provided by the hook trigger
- * 
+ *
  * @return string	An empty string to suppress the output of the original view
  */
 function roles_views_permissions($hook_name, $type, $return_value, $params) {
@@ -136,9 +136,9 @@ function roles_views_permissions($hook_name, $type, $return_value, $params) {
 
 
 /**
- * 
+ *
  * Processes action permissions from the role configuration array. This is called upon each action execution.
- * 
+ *
  * @param string $hook_name Equals "action"
  * @param string $type The registered action name
  * @param boolean $return_value
@@ -170,9 +170,9 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 
 
 /**
- * 
+ *
  * Processes menu permissions from the role configuration array. This is called upon each "register" triggered hook.
- * 
+ *
  * @param string $hook_name Equals "register"
  * @param string $type The triggered "register" hook's type
  * @param boolean $return_value
@@ -196,11 +196,9 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 
 					// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
 					if (($menu_name == $prepared_menu_name) && roles_check_context($perm_details)) {
-
 						// Need to act on this permission rule
 						switch ($perm_details['rule']) {
 							case 'deny':
-								list($menu_name, $item_name) = explode('::', $menu);
 								elgg_unregister_menu_item($menu_name, $item_name);
 								break;
 							case 'extend':
@@ -209,7 +207,6 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 								elgg_register_menu_item($menu, $menu_obj);
 								break;
 							case 'replace':
-								list($menu_name, $item_name) = explode('::', $menu);
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
 								roles_replace_menu($menu_name, $item_name, $menu_obj);
@@ -218,18 +215,19 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 							default:
 								break;
 						}
-						
+
 						// Return the updated menu to the hook triggering function (elgg_view_menu)
 						return roles_get_menu($menu_name);
-					}					
+					}
 				}
 			}
 		}
 	}
+	return $return_value;
 }
 
 /**
- * 
+ *
  * Processes page permissions from the role configuration array. This is called upon each "route" triggered hook.
  *
  * @param string $hook_name Equals "route"
@@ -272,10 +270,10 @@ function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 }
 
 /**
- * 
+ *
  * Processes hook permissions from the role configuration array. Triggered by the 'ready', 'system' event.
  * This is to make sure that all plugins' init functions have been executed, and all hook handlers have already been initialized
- * 
+ *
  * @param string $event Equals 'ready'
  * @param string $event_type Equals 'system'
  * @param mixed $object Not in use for this specific listener
@@ -330,10 +328,10 @@ function roles_hooks_permissions($event, $event_type, $object) {
 
 
 /**
- * 
+ *
  * Processes event permissions from the role configuration array. Triggered by the 'ready', 'system' event.
  * This is to make sure that all plugins' init functions have been executed, and all event handlers have already been initialized
- * 
+ *
  * @param string $event Equals 'ready'
  * @param string $event_type Equals 'system'
  * @param mixed $object Not in use for this specific listener
@@ -387,7 +385,7 @@ function roles_events_permissions($event, $type, $object) {
 }
 
 /**
- * 
+ *
  * Saves user role upon changing role on the user settings page
  *
  * @param string $hook_name Equals "usersettings:save"
