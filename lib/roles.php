@@ -336,43 +336,66 @@ function roles_check_update() {
 
 /**
  *
- * Replaces an existing menu item with a new one
+ * Unregisters a menu item from the passed menu array. 
+ * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
  *
- * @param string $menu_name The menu name ('site', 'filter', etc.)
+ * @param array $menu The menu array
+ * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be removed
+ * 
+ * @return array The new menu array without the unregistered item
+ */
+function roles_unregister_menu_item($menu, $item_name) {
+	$updated_menu = $menu;
+
+	if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
+		array_splice($updated_menu, $index, 1);
+	}
+	
+	return $updated_menu;
+}
+
+/**
+ *
+ * Replaces an existing menu item with a new one. 
+ * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
+ *
+ * @param array $menu The menu array
  * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
  * @param ElggMenuItem $menu_obj The replacement menu item
+ * 
+ * @return array The new menu array with the replaced item
  */
-function roles_replace_menu($menu_name, $item_name, $menu_obj) {
-	global $CONFIG;
-
-	if (false !== $index = roles_find_menu_index($menu_name, $item_name)) {
-		array_splice($CONFIG->menus[$menu_name], $index, 1, array($menu_obj));
+function roles_replace_menu_item($menu, $item_name, $menu_obj) {
+	$updated_menu = $menu;
+	
+	if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
+		array_splice($updated_menu, $index, 1, array($menu_obj));
 	}
+	
+	return $updated_menu;
 }
 
 /**
  *
  * Finds the index of a menu item in the menu array
  *
- * @param string $menu_name The menu name ('site', 'filter', etc.)
+ * @param string $menu The menu array
  * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
  *
  * @return int The index of the menu item in the menu array
  */
-function roles_find_menu_index($menu_name, $item_name) {
-	global $CONFIG;
+function roles_find_menu_index($menu, $item_name) {
 	$index = -1;
 	$found = false;
 
-	if (is_array($CONFIG->menus[$menu_name])) {
-		$count = count($CONFIG->menus[$menu_name]);
+	if (is_array($menu)) {
+		$count = count($menu);
 		while(!$found && (++$index < $count)) {
-			if ($CONFIG->menus[$menu_name][$index]->getName() === $item_name) {
+			if ($menu[$index]->getName() === $item_name) {
 				$found = true;
 			}
 		}
 	}
-
 	return $found ? $index : false;
 }
 
@@ -408,7 +431,6 @@ function roles_get_menu($menu_name) {
 	global $CONFIG;
 	return $CONFIG->menus[$menu_name];
 }
-
 
 /**
  *

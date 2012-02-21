@@ -181,6 +181,8 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 
 function roles_menus_permissions($hook, $type, $return_value, $params) {
 
+	$updated_menu = $return_value;
+	
 	// Ignore all triggered hooks except for 'menu:menu_name' type
 	list($hook_type, $prepared_menu_name) = explode(':', $type);
 
@@ -199,17 +201,18 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 						// Need to act on this permission rule
 						switch ($perm_details['rule']) {
 							case 'deny':
-								elgg_unregister_menu_item($menu_name, $item_name);
+								$updated_menu = roles_unregister_menu_item($updated_menu, $item_name);
 								break;
 							case 'extend':
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
 								elgg_register_menu_item($menu, $menu_obj);
+								$updated_menu = roles_get_menu($menu_name);
 								break;
 							case 'replace':
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
-								roles_replace_menu($menu_name, $item_name, $menu_obj);
+								$updated_menu = roles_replace_menu_item($updated_menu, $item_name, $menu_obj);
 								break;
 							case 'allow':
 							default:
@@ -217,7 +220,7 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 						}
 
 						// Return the updated menu to the hook triggering function (elgg_view_menu)
-						return roles_get_menu($menu_name);
+						return $updated_menu;
 					}
 				}
 			}
