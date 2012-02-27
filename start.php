@@ -52,7 +52,10 @@ function roles_init($event, $type, $object) {
 	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
 
 	// Check for role configuration updates
-	elgg_register_event_handler('ready', 'system', 'roles_check_update');
+	if (elgg_is_admin_logged_in()) {	// @TODO think through if this should rather be a role-based permission
+		run_function_once('roles_update_100_to_101');
+		elgg_register_event_handler('ready', 'system', 'roles_check_update');
+	}
 
 	// Set up roles based view management
 	elgg_register_event_handler('ready', 'system', 'roles_register_views');

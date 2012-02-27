@@ -322,14 +322,14 @@ function roles_create_from_config($roles_array) {
  *
  */
 function roles_check_update() {
-	$hash = elgg_get_plugin_setting('roles_hash');
+	$hash = elgg_get_plugin_setting('roles_hash', 'roles');
 	$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
 
 	$current_hash = sha1(serialize($roles_array));
 
 	if ($hash != $current_hash) {
 		roles_create_from_config($roles_array);
-		elgg_set_plugin_setting('roles_hash', $current_hash);
+		elgg_set_plugin_setting('roles_hash', $current_hash, 'roles');
 	}
 }
 
@@ -453,11 +453,13 @@ function roles_replace_dynamic_paths($str) {
 			$res = str_replace('{$self_rolename}', $role->name, $res);
 		}
 	}
-
-	$pageowner = elgg_get_page_owner_entity();
+	
+	// Safe way to get hold of the page owner before system, ready event
+	$pageowner_guid = elgg_trigger_plugin_hook('page_owner', 'system', NULL, 0);
+	$pageowner = get_entity($pageowner_guid);
+	
 	if (elgg_instanceof($pageowner, 'user')) {
 		$pageowner_username = $pageowner->username;
-		$pageowner_guid = $pageowner->guid;
 		$pageowner_role = roles_get_role($pageowner);
 
 		$res = str_replace('{$pageowner_name}', $pageowner_username, $res);
@@ -512,6 +514,19 @@ function roles_check_context($permission_details, $strict = false) {
 		}
 	}
 	return $result;
+}
+
+/**
+ * 
+ * Updates roles objects to 1.0.1 version
+ */
+function roles_update_100_to_101() {
+
+	// Remove all 'roles_hash' values from plugin settings
+	// This will force new storage of the configuration array hash
+	$dbprefix = elgg_get_config('dbprefix');
+	$statement = "DELETE from {$dbprefix}private_settings WHERE name = 'roles_hash'";
+	return delete_data($statement);
 }
 
 ?>
