@@ -348,7 +348,7 @@ function roles_unregister_menu_item($menu, $item_name) {
 	$updated_menu = $menu;
 
 	if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
-		array_splice($updated_menu, $index, 1);
+		unset($updated_menu[$index]);
 	}
 	
 	return $updated_menu;
@@ -369,7 +369,7 @@ function roles_replace_menu_item($menu, $item_name, $menu_obj) {
 	$updated_menu = $menu;
 	
 	if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
-		array_splice($updated_menu, $index, 1, array($menu_obj));
+		$updated_menu[$index] = $menu_obj;
 	}
 	
 	return $updated_menu;
@@ -385,14 +385,13 @@ function roles_replace_menu_item($menu, $item_name, $menu_obj) {
  * @return int The index of the menu item in the menu array
  */
 function roles_find_menu_index($menu, $item_name) {
-	$index = -1;
 	$found = false;
 
 	if (is_array($menu)) {
-		$count = count($menu);
-		while(!$found && (++$index < $count)) {
-			if ($menu[$index]->getName() === $item_name) {
+		foreach($menu as $index => $menu_obj) {
+			if ($menu_obj->getName() === $item_name) {
 				$found = true;
+				break;
 			}
 		}
 	}
