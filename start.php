@@ -46,7 +46,7 @@ function roles_init($event, $type, $object) {
 
 	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
 	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999);
-
+	
 	// Set up roles based hooks and event listener, after all plugin is initialized
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
@@ -209,7 +209,7 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 							case 'extend':
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
-								elgg_register_menu_item($menu, $menu_obj);
+								elgg_register_menu_item($menu_name, $menu_obj);
 								$updated_menu = roles_get_menu($menu_name);
 								break;
 							case 'replace':
@@ -222,14 +222,14 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 								break;
 						}
 
-						// Return the updated menu to the hook triggering function (elgg_view_menu)
-						return $updated_menu;
 					}
 				}
+
 			}
 		}
 	}
-	return $return_value;
+	// Return the updated menu to the hook triggering function (elgg_view_menu)
+	return $updated_menu;
 }
 
 /**
