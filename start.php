@@ -185,7 +185,7 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 function roles_menus_permissions($hook, $type, $return_value, $params) {
 
 	$updated_menu = $return_value;
-	
+
 	// Ignore all triggered hooks except for 'menu:menu_name' type
 	list($hook_type, $prepared_menu_name) = explode(':', $type);
 
@@ -193,29 +193,33 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 		$role = roles_get_role();
 		if (elgg_instanceof($role, 'object', 'role')) {
 			$role_perms = roles_get_role_permissions($role, 'menus');
+			
 			if (is_array($role_perms) && !empty($role_perms)) {
 
 				foreach ($role_perms as $menu => $perm_details) {
 
-					list($menu_name, $item_name) = explode('::', $menu);
+					$menu_parts = explode('::', $menu);
+					$menu_name = isset($menu_parts[0]) ? $menu_parts[0] : "";
 
 					// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
-					if (($menu_name == $prepared_menu_name) && roles_check_context($perm_details)) {
-						// Need to act on this permission rule
+					if (roles_check_context($perm_details)) {
+						// Try to act on this permission rule
 						switch ($perm_details['rule']) {
 							case 'deny':
-								$updated_menu = roles_unregister_menu_item($updated_menu, $item_name);
+								$updated_menu = roles_unregister_menu_item_recursive($updated_menu, $menu, $prepared_menu_name);
 								break;
 							case 'extend':
-								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
-								$menu_obj = ElggMenuItem::factory($menu_item);
-								elgg_register_menu_item($menu_name, $menu_obj);
-								$updated_menu = roles_get_menu($menu_name);
+								if ($menu_name === $prepared_menu_name) {
+									$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+									$menu_obj = ElggMenuItem::factory($menu_item);
+									elgg_register_menu_item($menu_name, $menu_obj);
+									$updated_menu = roles_get_menu($menu_name);
+								}
 								break;
 							case 'replace':
 								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
 								$menu_obj = ElggMenuItem::factory($menu_item);
-								$updated_menu = roles_replace_menu_item($updated_menu, $item_name, $menu_obj);
+								$updated_menu = roles_replace_menu_item_recursive($updated_menu, $menu, $prepared_menu_name, $menu_obj);
 								break;
 							case 'allow':
 							default:

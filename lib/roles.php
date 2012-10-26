@@ -375,6 +375,66 @@ function roles_replace_menu_item($menu, $item_name, $menu_obj) {
 	return $updated_menu;
 }
 
+
+function roles_unregister_menu_item_recursive($menu, $menu_item_name, $current_menu_name) {
+	$updated_menu = $menu;
+	
+	$menu_name_parts = explode('::', $menu_item_name);
+	if ((isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name) && (count($menu_name_parts) ===  1)) {
+		return array();
+	}
+	
+
+	if (is_array($updated_menu) && (isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name)) {
+		
+		foreach($updated_menu as $index => $menu_obj) {
+
+			if ((count($menu_name_parts) === 2) && ($menu_name_parts[1] === $menu_obj->getName())) {
+				unset($updated_menu[$index]);				
+			} else {
+				$children = $menu_obj->getChildren();
+				if (is_array($children) && !empty($children)) {
+					// This is a menu item with children
+					$current_item_name = implode("::", array_slice($menu_name_parts, 1));
+					$menu_obj->setChildren(roles_unregister_menu_item_recursive($children, $current_item_name, $menu_obj->getName()));				
+				}
+			}
+		}
+	}	
+	
+	return $updated_menu;
+}
+
+function roles_replace_menu_item_recursive($updated_menu, $menu, $prepared_menu_name, $menu_obj) {
+	$updated_menu = $menu;
+	
+	$menu_name_parts = explode('::', $menu_item_name);
+	if ((isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name) && (count($menu_name_parts) ===  1)) {
+		return $menu_obj;
+	}
+	
+
+	if (is_array($updated_menu) && (isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name)) {
+		
+		foreach($updated_menu as $index => $menu_obj) {
+
+			if ((count($menu_name_parts) === 2) && ($menu_name_parts[1] === $menu_obj->getName())) {
+				$updated_menu[$index] = $menu_obj;				
+			} else {
+				$children = $menu_obj->getChildren();
+				if (is_array($children) && !empty($children)) {
+					// This is a menu item with children
+					$current_item_name = implode("::", array_slice($menu_name_parts, 1));
+					$menu_obj->setChildren(roles_replace_menu_item_recursive($children, $current_item_name, $menu_obj->getName(), $menu_obj));				
+				}
+			}
+		}
+	}	
+	
+	return $updated_menu;
+	
+}
+
 /**
  *
  * Finds the index of a menu item in the menu array
