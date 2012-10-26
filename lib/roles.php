@@ -440,6 +440,7 @@ function roles_get_menu($menu_name) {
  * @return string The updated, substituted string
  */
 function roles_replace_dynamic_paths($str) {
+	$res = $str;
 	$user = elgg_get_logged_in_user_entity();
 	if (elgg_instanceof($user, 'user')) {
 		$self_username = $user->username;
