@@ -281,6 +281,7 @@ function roles_create_from_config($roles_array) {
 	$options = array(
 			'type' => 'object',
 			'subtype' => 'role',
+			'limit' => false // we need all roles
 	);
 	$roles = elgg_get_entities($options);
 
