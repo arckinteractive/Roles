@@ -403,7 +403,7 @@ function roles_user_settings_save($hook_name, $entity_type, $return_value, $para
 	$role_name = get_input('role');
 	$user_id = get_input('guid');
 
-	$role_name = roles_filter_role_name($role_name);
+	$role_name = roles_filter_role_name($role_name, $user_id);
 	$role = roles_get_role_by_name($role_name);
 	$user = get_entity($user_id);
 
