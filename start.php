@@ -30,6 +30,7 @@ elgg_register_event_handler('init', 'system', 'roles_init');
  * Initializes the Roles plugin
  */
 function roles_init($event, $type, $object) {
+	elgg_extend_view('forms/useradd', 'roles/useradd');
 
 	elgg_register_library('roles', elgg_get_plugins_path() . 'roles/lib/roles.php');
 	elgg_register_library('roles_config', elgg_get_plugins_path() . 'roles/lib/config.php');
@@ -50,6 +51,7 @@ function roles_init($event, $type, $object) {
 	// Set up roles based hooks and event listener, after all plugin is initialized
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
+	elgg_register_event_handler('create', 'user', 'roles_create_user');
 
 	// Check for role configuration updates
 	if (elgg_is_admin_logged_in()) {	// @TODO think through if this should rather be a role-based permission
@@ -424,4 +426,15 @@ function roles_user_settings_save($hook_name, $entity_type, $return_value, $para
 	return null;
 }
 
-?>
+
+function roles_create_user($event, $type, $user) {
+	$rolename = get_input('role', false);
+	if (elgg_is_admin_logged_in() && $rolename) {
+		// admin is adding a user, give them the role they asked for
+		$role = roles_get_role_by_name($rolename);
+		
+		if ($role) {
+			roles_set_role($role, $user);
+		}
+	}
+}
