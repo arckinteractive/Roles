@@ -316,6 +316,13 @@ function roles_create_from_config($roles_array) {
 		}
 	}
 
+	// remove old roles
+	$config_roles = array_keys($roles_array);
+	foreach ($existing_roles as $name => $role) {
+		if (!in_array($name, $config_roles)) {
+			$role->delete();
+		}
+	}
 }
 
 /**
