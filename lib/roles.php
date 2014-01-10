@@ -36,7 +36,7 @@ function roles_get_role($user = null) {
 	}
 
 	// Couldn't find role for the current user, or there is no logged in user
-	return roles_get_role_by_name(roles_filter_role_name(NO_ROLE));
+	return roles_get_role_by_name(roles_filter_role_name(NO_ROLE, $user->guid));
 }
 
 /**
@@ -248,16 +248,25 @@ function roles_get_role_by_name($role_name) {
 }
 
 /**
- * Resolves the default role for the currently logged in user
+ * Resolves the default role for specified or currently logged in user
 
- * @param string $role_name The name uf the user's role
+ * @param string $role_name The name of the user's role
+ * @param int $user_guid GUID of the user whose default role needs to be resolved
+ *
+ * @return string
  */
-function roles_filter_role_name($role_name) {
+function roles_filter_role_name($role_name, $user_guid = null) {
 	if ($role_name !== NO_ROLE) {
 		return $role_name;
 	}
 
-	if (!elgg_is_logged_in()) {
+	if ($user_guid) {
+		if (elgg_is_admin_user((int)$user_guid)) {
+			return ADMIN_ROLE;
+		} else {
+			return DEFAULT_ROLE;
+		}
+	} else if (!elgg_is_logged_in()) {
 		return VISITOR_ROLE;
 	} else if (elgg_is_admin_logged_in()) {
 		return ADMIN_ROLE;
