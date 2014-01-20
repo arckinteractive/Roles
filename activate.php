@@ -12,15 +12,11 @@ elgg_register_library('roles_config', elgg_get_plugins_path() . 'roles/lib/confi
 elgg_load_library('roles');
 elgg_load_library('roles_config');
 
-// Delete all role objects upon plugin activation. Not sure if it's a good decision to automatically delete existing roles
-$roles = roles_get_all_roles();
-foreach($roles as $role) {
-	$role->delete();
-}
-
 // Create the role objects from the configuration arrays
 $roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
 roles_create_from_config($roles_array);
 
-
+if (is_null(elgg_get_plugin_setting('automatic_reset', 'roles'))) {
+	elgg_set_plugin_setting('automatic_reset', true, 'roles');
+}
 ?>
