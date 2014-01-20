@@ -24,6 +24,8 @@ $english = array(
 	'roles:page:denied' => 'Sorry, but you do not have the necessary privileges to view that page.',
 	'roles:action:denied' => 'Sorry, but you do not have the necessary privileges to perform that action.',
 
+	'roles:settings:automatic_reset' => 'Automatic reset',
+	'roles:settings:automatic_reset:help' => 'Delete all roles when the plugin is deactivated',
 );
 
 add_translation("en", $english);
