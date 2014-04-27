@@ -169,7 +169,7 @@ function roles_get_role_permissions($role = null, $permission_type = null) {
 	}
 
 	if ($permission_type) {
-		return $PERMISSIONS_CACHE[$role->name][$permission_type];
+		return (isset($PERMISSIONS_CACHE[$role->name][$permission_type])) ? $PERMISSIONS_CACHE[$role->name][$permission_type] : null;
 	} else {
 		return $PERMISSIONS_CACHE[$role->name];
 	}
