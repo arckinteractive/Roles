@@ -1,0 +1,31 @@
+{
+	"name": "arckinteractive/roles",
+	"type": "elgg-plugin",
+	"repository": "ArckInteractive/Roles",
+	"description": "Roles for Elgg",
+	"homepage": "http://arckinteractive.com",
+	"minimum-stability": "stable",
+	"keywords": [
+		"elgg", "plugin", "roles"
+	],
+	"license": "GPL-2.0",
+	"authors": [
+		{
+			"name": "Andras Szepeshazi"
+		},
+		{
+			"name": "Matt Beckett"
+		},
+		{
+			"name": "Ismayil Khayredinov"
+		}
+	],
+	"extra": {
+		"installer-name": "roles"
+	},
+	"require": {
+		"php": ">=5.3.3",
+		"composer/installers": ">=1.0.8"
+	}
+}
+
