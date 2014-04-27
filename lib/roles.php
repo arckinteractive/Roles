@@ -214,7 +214,7 @@ function roles_cache_permissions($role) {
 
 	$permissions = unserialize($role->permissions);
 	foreach ($permissions as $type => $permission_rules) {
-		if (is_array($PERMISSIONS_CACHE[$role->name][$type])) {
+		if (isset($PERMISSIONS_CACHE[$role->name][$type]) && is_array($PERMISSIONS_CACHE[$role->name][$type])) {
 			$PERMISSIONS_CACHE[$role->name][$type] = array_merge($PERMISSIONS_CACHE[$role->name][$type], $permission_rules);
 		} else {
 			$PERMISSIONS_CACHE[$role->name][$type] = $permission_rules;
@@ -287,6 +287,8 @@ function roles_filter_role_name($role_name, $user_guid = null) {
 
 function roles_create_from_config($roles_array) {
 
+	elgg_log('Creating roles from config');
+
 	$options = array(
 			'type' => 'object',
 			'subtype' => 'role',
@@ -302,12 +304,16 @@ function roles_create_from_config($roles_array) {
 	foreach($roles_array as $rname => $rdetails) {
 		$current_role = $existing_roles[$rname];
 		if (elgg_instanceof($current_role, 'object', 'role')) {
+			elgg_log("Role '$rname' already exists; updating permissions");
 			// Update existing role obejct
 			$current_role->title = elgg_echo($rdetails['title']);
 			$current_role->extends = $rdetails['extends'];
 			$current_role->permissions = serialize($rdetails['permissions']);
-			$current_role->save();
+			if ($current_role->save()) {
+				elgg_log("Permissions for role '$rname' have been updated: " . print_r($rdetails['permissions'], true));
+			}
 		} else {
+			elgg_log("Creating a new role '$rname'");
 			// Create new role object
 			$new_role = new ElggRole();
 			$new_role->title = elgg_echo($rdetails['title']);
@@ -315,12 +321,16 @@ function roles_create_from_config($roles_array) {
 			$new_role->container_guid = $new_role->owner_guid;
 			$new_role->access_id = ACCESS_PUBLIC;
 			if (!($new_role->save())) {
-				error_log('Could not create new role $rname');
+				elgg_log("Could not create new role '$rname'");
 			} else {
 				// Add metadata
 				$new_role->name = $rname;
 				$new_role->extends = $rdetails['extends'];
 				$new_role->permissions = serialize($rdetails['permissions']);
+				if ($new_role->save()) {
+					elgg_log("Role object with guid $new_role->guid has been created");
+					elgg_log("Permissions for '$rname' have been set: " . print_r($rdetails['permissions'], true));
+				}
 			}
 		}
 	}
@@ -329,6 +339,7 @@ function roles_create_from_config($roles_array) {
 	$config_roles = array_keys($roles_array);
 	foreach ($existing_roles as $name => $role) {
 		if (!in_array($name, $config_roles)) {
+			elgg_log("Deleting role '$rname'");
 			$role->delete();
 		}
 	}
