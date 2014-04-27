@@ -287,7 +287,7 @@ function roles_filter_role_name($role_name, $user_guid = null) {
 
 function roles_create_from_config($roles_array) {
 
-	elgg_log('Creating roles from config');
+	elgg_log('Creating roles from config', 'DEBUG');
 
 	$options = array(
 			'type' => 'object',
@@ -304,16 +304,16 @@ function roles_create_from_config($roles_array) {
 	foreach($roles_array as $rname => $rdetails) {
 		$current_role = $existing_roles[$rname];
 		if (elgg_instanceof($current_role, 'object', 'role')) {
-			elgg_log("Role '$rname' already exists; updating permissions");
+			elgg_log("Role '$rname' already exists; updating permissions", 'DEBUG');
 			// Update existing role obejct
 			$current_role->title = elgg_echo($rdetails['title']);
 			$current_role->extends = $rdetails['extends'];
 			$current_role->permissions = serialize($rdetails['permissions']);
 			if ($current_role->save()) {
-				elgg_log("Permissions for role '$rname' have been updated: " . print_r($rdetails['permissions'], true));
+				elgg_log("Permissions for role '$rname' have been updated: " . print_r($rdetails['permissions'], true), 'DEBUG');
 			}
 		} else {
-			elgg_log("Creating a new role '$rname'");
+			elgg_log("Creating a new role '$rname'", 'DEBUG');
 			// Create new role object
 			$new_role = new ElggRole();
 			$new_role->title = elgg_echo($rdetails['title']);
@@ -321,15 +321,15 @@ function roles_create_from_config($roles_array) {
 			$new_role->container_guid = $new_role->owner_guid;
 			$new_role->access_id = ACCESS_PUBLIC;
 			if (!($new_role->save())) {
-				elgg_log("Could not create new role '$rname'");
+				elgg_log("Could not create new role '$rname'", 'DEBUG');
 			} else {
 				// Add metadata
 				$new_role->name = $rname;
 				$new_role->extends = $rdetails['extends'];
 				$new_role->permissions = serialize($rdetails['permissions']);
 				if ($new_role->save()) {
-					elgg_log("Role object with guid $new_role->guid has been created");
-					elgg_log("Permissions for '$rname' have been set: " . print_r($rdetails['permissions'], true));
+					elgg_log("Role object with guid $new_role->guid has been created", 'DEBUG');
+					elgg_log("Permissions for '$rname' have been set: " . print_r($rdetails['permissions'], true), 'DEBUG');
 				}
 			}
 		}
