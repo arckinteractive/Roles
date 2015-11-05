@@ -5,6 +5,19 @@ namespace Elgg\Roles;
 class Api {
 
 	/**
+	 * Permissions cache
+	 * @var array
+	 */
+	private $cache;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->cache = array();
+	}
+
+	/**
 	 * Obtains the role of a given user
 	 *
 	 * @param ElggUser $user User entity
@@ -135,41 +148,37 @@ class Api {
 	/**
 	 * Obtains a list of permissions associated with a particular role object
 	 *
-	 * @global array $PERMISSIONS_CACHE In-memory cache for role permission
 	 * @param ElggRole $role            The role to check for permissions
 	 * @param string   $permission_type The section from the configuration array ('actions', 'menus', 'views', etc.)
 	 * @return array The permission rules for the given role and permission type
 	 */
 	public function getPermissions($role = null, $permission_type = null) {
-		global $PERMISSIONS_CACHE;
 
 		$role = ($role == null) ? roles_get_role() : $role;
 		if (!elgg_instanceof($role, 'object', 'role')) {
 			return false;
 		}
 
-		if (!isset($PERMISSIONS_CACHE[$role->name])) {
+		if (!isset($this->cache[$role->name])) {
 			roles_cache_permissions($role);
 		}
 
 		if ($permission_type) {
-			return (isset($PERMISSIONS_CACHE[$role->name][$permission_type])) ? $PERMISSIONS_CACHE[$role->name][$permission_type] : null;
+			return (isset($this->cache[$role->name][$permission_type])) ? $this->cache[$role->name][$permission_type] : null;
 		} else {
-			return $PERMISSIONS_CACHE[$role->name];
+			return $this->cache[$role->name];
 		}
 	}
 
 	/**
 	 * Caches permissions associated with a role object. Also resolves all role extensions.
 	 *
-	 * @global array $PERMISSIONS_CACHE In-memory cache for role permission
 	 * @param ElggRole $role The role to cache permissions for
 	 * @return void
 	 */
 	public function cachePermissions($role) {
-		global $PERMISSIONS_CACHE;
-		if (!is_array($PERMISSIONS_CACHE[$role->name])) {
-			$PERMISSIONS_CACHE[$role->name] = array();
+		if (!is_array($this->cache[$role->name])) {
+			$this->cache[$role->name] = array();
 		}
 
 		// Let' start by processing role extensions
@@ -181,15 +190,15 @@ class Api {
 			foreach ($extends as $extended_role_name) {
 
 				$extended_role = roles_get_role_by_name($extended_role_name);
-				if (!isset($PERMISSIONS_CACHE[$extended_role->name])) {
+				if (!isset($this->cache[$extended_role->name])) {
 					roles_cache_permissions($extended_role);
 				}
 
-				foreach ($PERMISSIONS_CACHE[$extended_role->name] as $type => $permission_rules) {
-					if (is_array($PERMISSIONS_CACHE[$role->name][$type])) {
-						$PERMISSIONS_CACHE[$role->name][$type] = array_merge($PERMISSIONS_CACHE[$role->name][$type], $permission_rules);
+				foreach ($this->cache[$extended_role->name] as $type => $permission_rules) {
+					if (is_array($this->cache[$role->name][$type])) {
+						$this->cache[$role->name][$type] = array_merge($this->cache[$role->name][$type], $permission_rules);
 					} else {
-						$PERMISSIONS_CACHE[$role->name][$type] = $permission_rules;
+						$this->cache[$role->name][$type] = $permission_rules;
 					}
 				}
 			}
@@ -197,10 +206,10 @@ class Api {
 
 		$permissions = unserialize($role->permissions);
 		foreach ($permissions as $type => $permission_rules) {
-			if (isset($PERMISSIONS_CACHE[$role->name][$type]) && is_array($PERMISSIONS_CACHE[$role->name][$type])) {
-				$PERMISSIONS_CACHE[$role->name][$type] = array_merge($PERMISSIONS_CACHE[$role->name][$type], $permission_rules);
+			if (isset($this->cache[$role->name][$type]) && is_array($this->cache[$role->name][$type])) {
+				$this->cache[$role->name][$type] = array_merge($this->cache[$role->name][$type], $permission_rules);
 			} else {
-				$PERMISSIONS_CACHE[$role->name][$type] = $permission_rules;
+				$this->cache[$role->name][$type] = $permission_rules;
 			}
 		}
 	}
