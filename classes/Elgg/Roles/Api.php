@@ -302,7 +302,7 @@ class Api {
 			if ($current_role instanceof ElggRole) {
 				elgg_log("Role '$rname' already exists; updating permissions", 'DEBUG');
 				// Update existing role obejct
-				$current_role->title = elgg_echo($rdetails['title']);
+				$current_role->title = $rdetails['title'];
 				$current_role->extends = $rdetails['extends'];
 				$current_role->permissions = serialize($rdetails['permissions']);
 				if ($current_role->save()) {
@@ -312,7 +312,7 @@ class Api {
 				elgg_log("Creating a new role '$rname'", 'DEBUG');
 				// Create new role object
 				$new_role = new ElggRole();
-				$new_role->title = elgg_echo($rdetails['title']);
+				$new_role->title = $rdetails['title'];
 				$new_role->owner_guid = elgg_get_logged_in_user_guid();
 				$new_role->container_guid = $new_role->owner_guid;
 				$new_role->access_id = ACCESS_PUBLIC;

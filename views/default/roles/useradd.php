@@ -10,7 +10,7 @@ $roles_options = array(NO_ROLE => elgg_echo('roles:role:NO_ROLE'));
 $all_roles = roles_get_all_selectable_roles();
 if (is_array($all_roles) && !empty($all_roles)) {
 	foreach ($all_roles as $role) {
-		$roles_options[$role->name] = $role->title;
+		$roles_options[$role->name] = $role->getDisplayName();
 	}
 }
 ?>

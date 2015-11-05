@@ -25,6 +25,13 @@ class ElggRole extends ElggObject {
 	}	
 
 	/**
+	 * {@inheritdoc}
+	 */
+	public function getDisplayName() {
+		return elgg_echo($this->title);
+	}
+
+	/**
 	 * Gets all reserved role names
 	 * @return array The list of reserved role names
 	 */	
