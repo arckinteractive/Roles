@@ -1,7 +1,6 @@
 <?php
 
 /**
- * 
  * Class to implement Role objects
  * 
  * @package Roles
@@ -9,37 +8,24 @@
  * @copyright Arck Interactive, LLC 2012
  * @link http://www.arckinteractive.com/
  *
- * @property string $name  Role name
- * @property string $title Human readable role title
+ * @property string   $name        Role name
+ * @property string   $title       Human readable role title
+ * @property string   $permissions Serialize permissions config
+ * @property string[] $extends     An array of role names this array extends
  */
 class ElggRole extends ElggObject {
 
 	/**
-	 * Initializes the object's subtype to "role"
-	 * 
-	 * @see ElggObject::initializeAttributes()
+	 * {@inheritdoc}
 	 */
 	protected function initializeAttributes() {
 		parent::initializeAttributes();
 
 		$this->attributes['subtype'] = "role";
-	}
-	
-	/**
-	 * 
-	 * Create or update the role object
-	 * 
-	 * @param int $guid The GUID of the role object, if updating an existing object
-	 */
-	public function __construct($guid = null) {
-		parent::__construct($guid);
-	}
-	
+	}	
 
 	/**
-	 * 
 	 * Gets all reserved role names
-	 * 
 	 * @return array The list of reserved role names
 	 */	
 	public static function getReservedRoleNames() {
@@ -51,32 +37,26 @@ class ElggRole extends ElggObject {
 	 * Checks if a role name is reserved in the system
 	 * 
 	 * @param string $role_name The name of the role to check
-	 * 
 	 * @return boolean True if the passed $role_name is a reserved role name
 	 */
 	public static function isReservedRoleName($role_name) {
 		return in_array($role_name, ElggRole::getReservedRoleNames());
 	}
 	
-
-
 	/**
 	 * 
 	 * Checks if this role is a reserved role
-	 * 
 	 * @return boolean True if the current role is a reserved role
 	 */
 	public function isReservedRole() {
 		return ElggRole::isReservedRoleName($this->name);
 	}
 	
-
 	/**
 	 * Obtain the list of users for the current role object
 	 *
 	 * @param array $options An array of $key => $value pairs accepted by {@link elgg_get_entities()}
-
-	 * @return mixed The array of users having this role, false if no user found
+	 * @return ElggUser[]|false The array of users having this role, false if no user found
 	 */
 	public function getUsers($options) {
 
