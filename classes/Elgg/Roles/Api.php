@@ -8,6 +8,11 @@ use ElggUser;
 
 class Api {
 
+	const DEFAULT_ROLE = 'default';
+	const ADMIN_ROLE = 'admin';
+	const VISITOR_ROLE = 'visitor';
+	const NO_ROLE = '_no_role_';
+
 	/**
 	 * Permissions cache
 	 * @var array
@@ -46,7 +51,7 @@ class Api {
 		}
 
 		// Couldn't find role for the current user, or there is no logged in user
-		return roles_get_role_by_name(roles_filter_role_name(NO_ROLE, $user->guid));
+		return roles_get_role_by_name(roles_filter_role_name(self::NO_ROLE, $user->guid));
 	}
 
 	/**
@@ -55,7 +60,7 @@ class Api {
 	 * @param ElggUser $user User entity
 	 * @return bool True if the user belongs to the passed role, false otherwise
 	 */
-	public function hasRole(ElggUser $user = null, $role_name = DEFAULT_ROLE) {
+	public function hasRole(ElggUser $user = null, $role_name = self::DEFAULT_ROLE) {
 
 		$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
 		if (!$user instanceof ElggUser) {
@@ -85,7 +90,7 @@ class Api {
 	 * @param ElggUser $user The user the role needs to be assigned to
 	 * @return bool|void True if the role change was successful, false if could not update user role, and null if there was no change in user role
 	 */
-	public function setRole(ElggRole$role, ElggUser $user = null) {
+	public function setRole(ElggRole $role, ElggUser $user = null) {
 		if (!$role instanceof ElggRole) {
 			return false; // Couldn't set new role
 		}
@@ -98,7 +103,7 @@ class Api {
 		$current_role = roles_get_role($user);
 		if ($role != $current_role) {
 			remove_entity_relationships($user->guid, 'has_role');
-			if (($role->name != DEFAULT_ROLE) && ($role->name != ADMIN_ROLE)) {
+			if (($role->name != self::DEFAULT_ROLE) && ($role->name != self::ADMIN_ROLE)) {
 				if (!add_entity_relationship($user->guid, 'has_role', $role->guid)) {
 					return false; // Couldn't set new role
 				}
@@ -247,22 +252,22 @@ class Api {
 	 * @return string
 	 */
 	public function filterName($role_name, $user_guid = null) {
-		if ($role_name !== NO_ROLE) {
+		if ($role_name !== self::NO_ROLE) {
 			return $role_name;
 		}
 
 		if ($user_guid) {
 			if (elgg_is_admin_user((int) $user_guid)) {
-				return ADMIN_ROLE;
+				return self::ADMIN_ROLE;
 			} else {
-				return DEFAULT_ROLE;
+				return self::DEFAULT_ROLE;
 			}
 		} else if (!elgg_is_logged_in()) {
-			return VISITOR_ROLE;
+			return self::VISITOR_ROLE;
 		} else if (elgg_is_admin_logged_in()) {
-			return ADMIN_ROLE;
+			return self::ADMIN_ROLE;
 		} else {
-			return DEFAULT_ROLE;
+			return self::DEFAULT_ROLE;
 		}
 	}
 

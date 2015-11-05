@@ -16,10 +16,10 @@ require_once __DIR__ . '/autoloader.php';
  *
  * Default role constants definitions
  */
-define('DEFAULT_ROLE', 'default');
-define('ADMIN_ROLE', 'admin');
-define('VISITOR_ROLE', 'visitor');
-define('NO_ROLE', '_no_role_');
+define('DEFAULT_ROLE', \Elgg\Roles\Api::DEFAULT_ROLE);
+define('ADMIN_ROLE', \Elgg\Roles\Api::ADMIN_ROLE);
+define('VISITOR_ROLE', \Elgg\Roles\Api::VISITOR_ROLE);
+define('NO_ROLE', \Elgg\Roles\Api::NO_ROLE);
 
 /**
  *
