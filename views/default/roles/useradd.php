@@ -20,7 +20,7 @@ if (is_array($all_roles) && !empty($all_roles)) {
 	</div>
 	<div class="elgg-body">
 		<p>
-<?php echo elgg_echo('user:role:label'); ?>:
+			<?php echo elgg_echo('user:role:label'); ?>:
 			<?php
 			echo elgg_view("input/dropdown", array(
 				'name' => 'role',
@@ -33,7 +33,7 @@ if (is_array($all_roles) && !empty($all_roles)) {
 </div>
 
 <script>
-	$(document).ready(function () {
+	require(['jquery'], function ($) {
 		$('.elgg-module-info-roles').insertBefore($('.elgg-form-useradd input[type=submit]'));
 	});
 </script>
