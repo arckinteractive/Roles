@@ -11,6 +11,8 @@
  */
 
 require_once __DIR__ . '/autoloader.php';
+require_once __DIR__ . '/lib/roles.php';
+require_once __DIR__ . '/lib/config.php';
 
 /**
  *
@@ -33,12 +35,6 @@ elgg_register_event_handler('init', 'system', 'roles_init');
  */
 function roles_init($event, $type, $object) {
 	elgg_extend_view('forms/useradd', 'roles/useradd');
-
-	elgg_register_library('roles', elgg_get_plugins_path() . 'roles/lib/roles.php');
-	elgg_register_library('roles_config', elgg_get_plugins_path() . 'roles/lib/config.php');
-
-	elgg_load_library('roles');
-	elgg_load_library('roles_config');
 
 	// Provides default roles by own handler. This should be extended by site specific handlers
 	elgg_register_plugin_hook_handler('roles:config', 'role', 'roles_get_roles_config');
