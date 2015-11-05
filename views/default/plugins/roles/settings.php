@@ -12,10 +12,4 @@ echo elgg_view('input/dropdown', array(
 	)
 ));
 echo '</div>';
-?>
-
-
-
-
-
 

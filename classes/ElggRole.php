@@ -9,6 +9,8 @@
  * @copyright Arck Interactive, LLC 2012
  * @link http://www.arckinteractive.com/
  *
+ * @property string $name  Role name
+ * @property string $title Human readable role title
  */
 class ElggRole extends ElggObject {
 
