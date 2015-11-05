@@ -213,7 +213,7 @@ class Api {
 			}
 		}
 
-		$permissions = unserialize($role->permissions);
+		$permissions = $role->getPermissions();
 		foreach ($permissions as $type => $permission_rules) {
 			if (isset($this->cache[$role->name][$type]) && is_array($this->cache[$role->name][$type])) {
 				$this->cache[$role->name][$type] = array_merge($this->cache[$role->name][$type], $permission_rules);
@@ -304,7 +304,7 @@ class Api {
 				// Update existing role obejct
 				$current_role->title = $rdetails['title'];
 				$current_role->extends = $rdetails['extends'];
-				$current_role->permissions = serialize($rdetails['permissions']);
+				$current_role->setPermissions($rdetails['permissions']);
 				if ($current_role->save()) {
 					elgg_log("Permissions for role '$rname' have been updated: " . print_r($rdetails['permissions'], true), 'DEBUG');
 				}
@@ -322,7 +322,7 @@ class Api {
 					// Add metadata
 					$new_role->name = $rname;
 					$new_role->extends = $rdetails['extends'];
-					$new_role->permissions = serialize($rdetails['permissions']);
+					$new_role->setPermissions($rdetails['permissions']));
 					if ($new_role->save()) {
 						elgg_log("Role object with guid $new_role->guid has been created", 'DEBUG');
 						elgg_log("Permissions for '$rname' have been set: " . print_r($rdetails['permissions'], true), 'DEBUG');

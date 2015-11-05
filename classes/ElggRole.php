@@ -10,10 +10,15 @@
  *
  * @property string   $name        Role name
  * @property string   $title       Human readable role title
- * @property string   $permissions Serialize permissions config
  * @property string[] $extends     An array of role names this array extends
  */
 class ElggRole extends ElggObject {
+
+	/**
+	 * Protected permissions metadata
+	 * @var string 
+	 */
+	protected $permissions;
 
 	/**
 	 * {@inheritdoc}
@@ -29,6 +34,22 @@ class ElggRole extends ElggObject {
 	 */
 	public function getDisplayName() {
 		return elgg_echo($this->title);
+	}
+
+	/**
+	 * Sets role permissions
+	 * @return void
+	 */
+	public function setPermissions($permissions = array()) {
+		$this->permissions = serialize($permissions);
+	}
+
+	/**
+	 * Returns an array of permissions for this role
+	 * @return array
+	 */
+	public function getPermissions() {
+		return unserialize($this->permissions);
 	}
 
 	/**
