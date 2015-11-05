@@ -10,6 +10,8 @@
  * @link http://www.arckinteractive.com/
  */
 
+require_once __DIR__ . '/autoloader.php';
+
 /**
  *
  * Default role constants definitions
