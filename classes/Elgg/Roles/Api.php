@@ -2,10 +2,6 @@
 
 namespace Elgg\Roles;
 
-use ElggMenuItem;
-use ElggRole;
-use ElggUser;
-
 class Api {
 
 	/**
@@ -14,11 +10,11 @@ class Api {
 	 * @param ElggUser $user User entity
 	 * @return ElggRole The role the user belongs to
 	 */
-	public function getRole(ElggUser $user = null) {
+	public function getRole(\ElggUser $user = null) {
 
 		$user = $user ? $user : elgg_get_logged_in_user_entity();
 
-		if ($user instanceof ElggUser) {
+		if (elgg_instanceof($user, 'user')) {
 			$options = array(
 				'type' => 'object',
 				'subtype' => 'role',
@@ -39,13 +35,13 @@ class Api {
 	/**
 	 * Checks if the user has a specific role
 	 *
-	 * @param ElggUser $user User entity
+	 * @param ElggUser $user
 	 * @return bool True if the user belongs to the passed role, false otherwise
 	 */
-	public function hasRole(ElggUser $user = null, $role_name = DEFAULT_ROLE) {
+	public function hasRole($user = null, $role_name = DEFAULT_ROLE) {
 
 		$user = $user ? $user : elgg_get_logged_in_user_entity();
-		if (!$user instanceof ElggUser) {
+		if (!elgg_instanceof($user, 'user')) {
 			return false;
 		}
 
@@ -72,13 +68,13 @@ class Api {
 	 * @param ElggUser $user The user the role needs to be assigned to
 	 * @return bool|void True if the role change was successful, false if could not update user role, and null if there was no change in user role
 	 */
-	public function setRole(ElggRole $role, ElggUser $user = null) {
-		if (!$role instanceof ElggRole {
+	public function setRole($role, $user = null) {
+		if (!elgg_instanceof($role, 'object', 'role')) {
 			return false; // Couldn't set new role
 		}
 
 		$user = $user ? $user : elgg_get_logged_in_user_entity();
-		if (!$user instanceof ElggUser) {
+		if (!elgg_instanceof($user, 'user')) {
 			return false; // Couldn't set new role
 		}
 
@@ -144,11 +140,11 @@ class Api {
 	 * @param string   $permission_type The section from the configuration array ('actions', 'menus', 'views', etc.)
 	 * @return array The permission rules for the given role and permission type
 	 */
-	public function getPermissions(ElggRole$role = null, $permission_type = null) {
+	public function getPermissions($role = null, $permission_type = null) {
 		global $PERMISSIONS_CACHE;
 
 		$role = ($role == null) ? roles_get_role() : $role;
-		if (!$role instanceof ElggRole {
+		if (!elgg_instanceof($role, 'object', 'role')) {
 			return false;
 		}
 
@@ -285,7 +281,7 @@ class Api {
 
 		foreach ($roles_array as $rname => $rdetails) {
 			$current_role = $existing_roles[$rname];
-			if ($current_role instanceof ElggRole {
+			if (elgg_instanceof($current_role, 'object', 'role')) {
 				elgg_log("Role '$rname' already exists; updating permissions", 'DEBUG');
 				// Update existing role obejct
 				$current_role->title = elgg_echo($rdetails['title']);
@@ -297,7 +293,7 @@ class Api {
 			} else {
 				elgg_log("Creating a new role '$rname'", 'DEBUG');
 				// Create new role object
-				$new_role = new ElggRole);
+				$new_role = new ElggRole();
 				$new_role->title = elgg_echo($rdetails['title']);
 				$new_role->owner_guid = elgg_get_logged_in_user_guid();
 				$new_role->container_guid = $new_role->owner_guid;
@@ -515,14 +511,14 @@ class Api {
 	public function replaceDynamicPaths($str) {
 		$res = $str;
 		$user = elgg_get_logged_in_user_entity();
-		if ($user instanceof ElggUser) {
+		if (elgg_instanceof($user, 'user')) {
 			$self_username = $user->username;
 			$self_guid = $user->guid;
 			$role = roles_get_role($user);
 
 			$res = str_replace('{$self_username}', $self_username, $str);
 			$res = str_replace('{$self_guid}', $self_guid, $res);
-			if ($role instanceof ElggRole {
+			if (elgg_instanceof($role, 'object', 'role')) {
 				$res = str_replace('{$self_rolename}', $role->name, $res);
 			}
 		}
@@ -531,7 +527,7 @@ class Api {
 		$pageowner_guid = elgg_trigger_plugin_hook('page_owner', 'system', NULL, 0);
 		$pageowner = get_entity($pageowner_guid);
 
-		if ($pageowner instanceof ElggUser) {
+		if (elgg_instanceof($pageowner, 'user')) {
 			$pageowner_username = $pageowner->username;
 			$pageowner_role = roles_get_role($pageowner);
 
