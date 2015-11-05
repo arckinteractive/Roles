@@ -34,9 +34,10 @@ class ElggRole extends ElggObject {
 	/**
 	 * Gets all reserved role names
 	 * @return array The list of reserved role names
+	 * @deprecated 2.0
 	 */	
 	public static function getReservedRoleNames() {
-		return array(DEFAULT_ROLE, ADMIN_ROLE, VISITOR_ROLE);
+		return roles()->getReservedRoleNames();
 	}
 	
 	/**
@@ -45,9 +46,10 @@ class ElggRole extends ElggObject {
 	 * 
 	 * @param string $role_name The name of the role to check
 	 * @return boolean True if the passed $role_name is a reserved role name
+	 * @deprecated 2.0
 	 */
 	public static function isReservedRoleName($role_name) {
-		return in_array($role_name, ElggRole::getReservedRoleNames());
+		return roles()->isReservedRoleName($role_name);
 	}
 	
 	/**
@@ -56,7 +58,7 @@ class ElggRole extends ElggObject {
 	 * @return boolean True if the current role is a reserved role
 	 */
 	public function isReservedRole() {
-		return ElggRole::isReservedRoleName($this->name);
+		return roles()->isReservedRoleName($this->name);
 	}
 	
 	/**

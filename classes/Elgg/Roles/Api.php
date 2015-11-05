@@ -139,7 +139,7 @@ class Api {
 	public function getSelectable() {
 
 		$dbprefix = elgg_get_config('dbprefix');
-		$reserved_role_names = "('" . implode("','", ElggRole::getReservedRoleNames()) . "')";
+		$reserved_role_names = "('" . implode("','", $this->getReservedRoleNames()) . "')";
 		$options = array(
 			'type' => 'object',
 			'subtype' => 'role',
@@ -596,6 +596,25 @@ class Api {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * Gets all reserved role names
+	 * @return array The list of reserved role names
+	 */
+	public function getReservedRoleNames() {
+		return array(self::DEFAULT_ROLE, self::ADMIN_ROLE, self::VISITOR_ROLE);
+	}
+
+	/**
+	 *
+	 * Checks if a role name is reserved in the system
+	 *
+	 * @param string $role_name The name of the role to check
+	 * @return boolean True if the passed $role_name is a reserved role name
+	 */
+	public function isReservedRoleName($role_name) {
+		return in_array($role_name, $this->getReservedRoleNames());
 	}
 
 }
