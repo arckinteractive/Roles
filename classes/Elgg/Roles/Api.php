@@ -163,13 +163,13 @@ class Api {
 	 */
 	public function getPermissions(ElggRole $role = null, $permission_type = null) {
 
-		$role = isset($role) ? $role : roles_get_role();
+		$role = isset($role) ? $role : $this->getRole();
 		if (!$role instanceof ElggRole) {
 			return false;
 		}
 
 		if (!isset($this->cache[$role->name])) {
-			roles_cache_permissions($role);
+			$this->cachePermissions($role);
 		}
 
 		if ($permission_type) {
@@ -194,10 +194,9 @@ class Api {
 		$extends = $role->getExtends();
 		if (!empty($extends)) {
 			foreach ($extends as $extended_role_name) {
-
-				$extended_role = roles_get_role_by_name($extended_role_name);
+				$extended_role = $this->get($extended_role_name);
 				if (!isset($this->cache[$extended_role->name])) {
-					roles_cache_permissions($extended_role);
+					$this->cachePermissions($extended_role);
 				}
 
 				foreach ($this->cache[$extended_role->name] as $type => $permission_rules) {
@@ -319,7 +318,7 @@ class Api {
 					// Add metadata
 					$new_role->name = $rname;
 					$new_role->setExtends($rdetails['extends']);
-					$new_role->setPermissions($rdetails['permissions']));
+					$new_role->setPermissions($rdetails['permissions']);
 					if ($new_role->save()) {
 						elgg_log("Role object with guid $new_role->guid has been created", 'DEBUG');
 						elgg_log("Permissions for '$rname' have been set: " . print_r($rdetails['permissions'], true), 'DEBUG');

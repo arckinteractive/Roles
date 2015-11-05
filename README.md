@@ -192,6 +192,16 @@ function myroles_config($hook_name, $entity_type, $return_value, $params) {
 }
 ```
 
+For simple rules, such as `allow` and `deny`, you can use short syntax:
+
+```php
+$permissions['actions'] = array(
+		'groups/save' => 'deny',
+		'blogs/save' => 'allow',
+	),
+);
+```
+
 The above code adds a new role to the system identified as `limited_users`. Members of this role
 will not be able to create groups, as defined by the permission section of the configuration array.
 Permissions will be explained in more detail later.

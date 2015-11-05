@@ -32,7 +32,7 @@ class ElggRole extends ElggObject {
 		parent::initializeAttributes();
 
 		$this->attributes['subtype'] = "role";
-	}	
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -54,7 +54,21 @@ class ElggRole extends ElggObject {
 	 * @return array
 	 */
 	public function getPermissions() {
-		return unserialize($this->permissions);
+		$permissions = unserialize($this->permissions);
+		if (!is_array($permissions)) {
+			return array();
+		}
+		foreach ($permissions as $type => $rules) {
+			if (!is_array($rules)) {
+				continue;
+			}
+			foreach ($rules as $name => $opts) {
+				if (is_string($opts)) {
+					$permissions[$type][$name] = array('rule' => $opts);
+				}
+			}
+		}
+		return $permissions;
 	}
 
 	/**
@@ -78,11 +92,11 @@ class ElggRole extends ElggObject {
 	 * Gets all reserved role names
 	 * @return array The list of reserved role names
 	 * @deprecated 2.0
-	 */	
+	 */
 	public static function getReservedRoleNames() {
 		return roles()->getReservedRoleNames();
 	}
-	
+
 	/**
 	 * 
 	 * Checks if a role name is reserved in the system
@@ -94,7 +108,7 @@ class ElggRole extends ElggObject {
 	public static function isReservedRoleName($role_name) {
 		return roles()->isReservedRoleName($role_name);
 	}
-	
+
 	/**
 	 * 
 	 * Checks if this role is a reserved role
@@ -103,7 +117,7 @@ class ElggRole extends ElggObject {
 	public function isReservedRole() {
 		return roles()->isReservedRoleName($this->name);
 	}
-	
+
 	/**
 	 * Obtain the list of users for the current role object
 	 *
