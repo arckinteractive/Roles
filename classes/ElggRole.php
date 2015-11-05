@@ -10,7 +10,6 @@
  *
  * @property string   $name        Role name
  * @property string   $title       Human readable role title
- * @property string[] $extends     An array of role names this array extends
  */
 class ElggRole extends ElggObject {
 
@@ -19,6 +18,12 @@ class ElggRole extends ElggObject {
 	 * @var string 
 	 */
 	protected $permissions;
+
+	/**
+	 * Protected extends metdata
+	 * @var string[] 
+	 */
+	protected $extends;
 
 	/**
 	 * {@inheritdoc}
@@ -50,6 +55,23 @@ class ElggRole extends ElggObject {
 	 */
 	public function getPermissions() {
 		return unserialize($this->permissions);
+	}
+
+	/**
+	 * Set extends
+	 * @param string[] $extends
+	 * @return void
+	 */
+	public function setExtends($extends = array()) {
+		$this->extends = $extends;
+	}
+
+	/**
+	 * Get extends
+	 * @return string[]
+	 */
+	public function getExtends() {
+		return (array) $this->extends;
 	}
 
 	/**

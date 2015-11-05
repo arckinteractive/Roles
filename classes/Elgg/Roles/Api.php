@@ -191,11 +191,8 @@ class Api {
 		}
 
 		// Let' start by processing role extensions
-		$extends = $role->extends;
-		if (!empty($role->extends) && !is_array($extends)) {
-			$extends = array($extends);
-		}
-		if (is_array($extends) && !empty($extends)) {
+		$extends = $role->getExtends();
+		if (!empty($extends)) {
 			foreach ($extends as $extended_role_name) {
 
 				$extended_role = roles_get_role_by_name($extended_role_name);
@@ -303,7 +300,7 @@ class Api {
 				elgg_log("Role '$rname' already exists; updating permissions", 'DEBUG');
 				// Update existing role obejct
 				$current_role->title = $rdetails['title'];
-				$current_role->extends = $rdetails['extends'];
+				$current_role->setExtends($rdetails['extends']);
 				$current_role->setPermissions($rdetails['permissions']);
 				if ($current_role->save()) {
 					elgg_log("Permissions for role '$rname' have been updated: " . print_r($rdetails['permissions'], true), 'DEBUG');
@@ -321,7 +318,7 @@ class Api {
 				} else {
 					// Add metadata
 					$new_role->name = $rname;
-					$new_role->extends = $rdetails['extends'];
+					$new_role->setExtends($rdetails['extends']);
 					$new_role->setPermissions($rdetails['permissions']));
 					if ($new_role->save()) {
 						elgg_log("Role object with guid $new_role->guid has been created", 'DEBUG');
