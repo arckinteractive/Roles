@@ -5,7 +5,6 @@
  * @package Elgg
  * @subpackage Core
  */
-
 $roles_options = array(NO_ROLE => elgg_echo('roles:role:NO_ROLE'));
 
 $all_roles = roles_get_all_selectable_roles();
@@ -14,7 +13,6 @@ if (is_array($all_roles) && !empty($all_roles)) {
 		$roles_options[$role->name] = $role->title;
 	}
 }
-
 ?>
 <div class="elgg-module elgg-module-info elgg-module-info-roles">
 	<div class="elgg-head">
@@ -22,7 +20,7 @@ if (is_array($all_roles) && !empty($all_roles)) {
 	</div>
 	<div class="elgg-body">
 		<p>
-			<?php echo elgg_echo('user:role:label'); ?>:
+<?php echo elgg_echo('user:role:label'); ?>:
 			<?php
 			echo elgg_view("input/dropdown", array(
 				'name' => 'role',
@@ -35,7 +33,7 @@ if (is_array($all_roles) && !empty($all_roles)) {
 </div>
 
 <script>
-	$(document).ready(function() {
+	$(document).ready(function () {
 		$('.elgg-module-info-roles').insertBefore($('.elgg-form-useradd input[type=submit]'));
 	});
 </script>
