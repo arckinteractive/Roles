@@ -16,7 +16,7 @@ if (file_exists("{$plugin_root}/vendor/autoload.php")) {
 function roles() {
 	static $api;
 	if (!isset($api)) {
-		$api = new \Elgg\Roles\Api();
+		$api = new \Elgg\Roles\Api(new \Elgg\Roles\Db());
 	}
 	return $api;
 }

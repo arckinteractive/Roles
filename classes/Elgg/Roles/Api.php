@@ -14,16 +14,28 @@ class Api {
 	const NO_ROLE = '_no_role_';
 
 	/**
+	 * @var DbInterface
+	 */
+	private $db;
+
+	/**
 	 * Permissions cache
 	 * @var array
 	 */
 	private $cache;
 
 	/**
+	 * Roles cache
+	 * @var ElggRole[]
+	 */
+	private $roles;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct(DbInterface $db) {
 		$this->cache = array();
+		$this->db = $db;
 	}
 
 	/**
@@ -186,7 +198,7 @@ class Api {
 	 * @return void
 	 */
 	public function cachePermissions(ElggRole $role) {
-		if (!is_array($this->cache[$role->name])) {
+		if (empty($this->cache[$role->name])) {
 			$this->cache[$role->name] = array();
 		}
 
@@ -194,12 +206,15 @@ class Api {
 		$extends = $role->getExtends();
 		if (!empty($extends)) {
 			foreach ($extends as $extended_role_name) {
-				$extended_role = $this->get($extended_role_name);
+				$extended_role = $this->getRoleByName($extended_role_name);
 				if (!isset($this->cache[$extended_role->name])) {
 					$this->cachePermissions($extended_role);
 				}
 
 				foreach ($this->cache[$extended_role->name] as $type => $permission_rules) {
+					if (empty($this->cache[$role->name][$type])) {
+						$this->cache[$role->name][$type] = array();
+					}
 					if (is_array($this->cache[$role->name][$type])) {
 						$this->cache[$role->name][$type] = array_merge($this->cache[$role->name][$type], $permission_rules);
 					} else {
@@ -225,19 +240,11 @@ class Api {
 	 * @param string $role_name The name of the role
 	 * @return ElggRole|false An ElggRole object if it could be found based on the name, false otherwise
 	 */
-	public function get($role_name) {
-		$options = array(
-			'type' => 'object',
-			'subtype' => 'role',
-			'metadata_name_value_pairs' => array('name' => 'name', 'value' => $role_name, 'operand' => '=')
-		);
-		$role_array = elgg_get_entities_from_metadata($options);
-
-		if (is_array($role_array) && !empty($role_array)) {
-			return $role_array[0];
-		} else {
-			return false;
+	public function getRoleByName($role_name = '') {
+		if (!isset($this->roles[$role_name])) {
+			$this->roles[$role_name] = $this->db->getRoleByName($role_name);
 		}
+		return $this->roles[$role_name];
 	}
 
 	/**

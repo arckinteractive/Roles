@@ -90,7 +90,7 @@ function roles_cache_permissions($role) {
  * @return ElggRole|false An ElggRole object if it could be found based on the name, false otherwise
  */
 function roles_get_role_by_name($role_name) {
-	return roles()->get($role_name);
+	return roles()->getRoleByName($role_name);
 }
 
 /**
