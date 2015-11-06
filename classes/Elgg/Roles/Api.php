@@ -105,7 +105,7 @@ class Api {
 			$this->roles = array();
 			$roles = $this->db->getAllRoles();
 			foreach ($roles as $role) {
-				/* @var $role \ElggRole */
+				/* @var $role ElggRole */
 				$this->roles[$role->name] = $role;
 			}
 		}
@@ -122,7 +122,7 @@ class Api {
 	 */
 	public function getSelectable() {
 		$roles = $this->getAll();
-		return array_filter($roles, function(\ElggRole $role) {
+		return array_filter($roles, function(ElggRole $role) {
 			return !$role->isReservedRole();
 		});
 	}
@@ -204,15 +204,15 @@ class Api {
 	 * Resolves the default role for specified or currently logged in user
 	 *
 	 * @param string    $role_name The name of the user's role
-	 * @param \ElggUser $user      User whose default role needs to be resolved
+	 * @param ElggUser $user      User whose default role needs to be resolved
 	 * @return string
 	 */
-	public function filterName($role_name, \ElggUser $user = null) {
+	public function filterName($role_name, ElggUser $user = null) {
 		if ($role_name !== self::NO_ROLE) {
 			return $role_name;
 		}
 
-		if ($user instanceof \ElggUser) {
+		if ($user instanceof ElggUser) {
 			return $user->isAdmin() ? self::ADMIN_ROLE : self::DEFAULT_ROLE;
 		}
 
