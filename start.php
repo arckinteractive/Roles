@@ -72,37 +72,38 @@ function roles_init() {
  *
  * @param string $event      "ready"
  * @param string $event_type "system"
- * @param mixed $object      Not in use for this specific listener
+ * @param mixed  $object     Not in use for this specific listener
  * @return void
  */
 function roles_register_views($event, $event_type, $object) {
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'views');
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $view => $perm_details) {
-				switch ($perm_details['rule']) {
-					case 'deny':
-						elgg_register_plugin_hook_handler('view', $view, 'roles_views_permissions');
-						break;
-					case 'extend':
-						$params = $perm_details['view_extension'];
-						$view_extension = roles_replace_dynamic_paths($params['view']);
-						$priority = isset($params['priority']) ? $params['priority'] : 501;
-						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
-						elgg_extend_view($view, $view_extension, $priority, $viewtype);
-						break;
-					case 'replace':
-						$params = $perm_details['view_replacement'];
-						$location = elgg_get_root_path() . roles_replace_dynamic_paths($params['location']);
-						$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
-						elgg_set_view_location($view, $location, $viewtype);
-						break;
-					case 'allow':
-					default:
-						break;
-				}
-			}
+	if (!$role instanceof \ElggRole) {
+		return;
+	}
+
+	$role_perms = roles_get_role_permissions($role, 'views');
+
+	foreach ($role_perms as $view => $perm_details) {
+		switch ($perm_details['rule']) {
+			case 'deny':
+				elgg_register_plugin_hook_handler('view', $view, 'roles_views_permissions');
+				break;
+			case 'extend':
+				$params = $perm_details['view_extension'];
+				$view_extension = roles_replace_dynamic_paths($params['view']);
+				$priority = isset($params['priority']) ? $params['priority'] : 501;
+				$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+				elgg_extend_view($view, $view_extension, $priority, $viewtype);
+				break;
+			case 'replace':
+				$params = $perm_details['view_replacement'];
+				$location = elgg_get_root_path() . roles_replace_dynamic_paths($params['location']);
+				$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+				elgg_set_view_location($view, $location, $viewtype);
+				break;
+			case 'allow':
+			default:
+				break;
 		}
 	}
 }
@@ -115,25 +116,25 @@ function roles_register_views($event, $event_type, $object) {
  * @param string $type         The view name
  * @param mixed  $return_value The original view output
  * @param mixed  $params       An associative array of parameters provided by the hook trigger
- * @return string	An empty string to suppress the output of the original view
+ * @return string An empty string to suppress the output of the original view
  */
 function roles_views_permissions($hook_name, $type, $return_value, $params) {
 
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'views');
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $view => $perm_details) {
-				if ($params['view'] == $view) {
-					return ''; // Supress view output
-				}
-			}
+	if (!$role instanceof \ElggRole) {
+		return;
+	}
+
+	$role_perms = roles_get_role_permissions($role, 'views');
+	foreach ($role_perms as $view => $perm_details) {
+		if ($params['view'] == $view) {
+			return ''; // Supress view output
 		}
 	}
 }
 
 /**
- * Processes action permissions from the role configuration array. This is called upon each action execution.
+ * Processes action permissions from the role configuration array. This is  called u pon each action execution.
  *
  * @param string  $hook_name    "action"
  * @param string  $type         The registered action name
@@ -142,22 +143,24 @@ function roles_views_permissions($hook_name, $type, $return_value, $params) {
  * @return boolean|void True if the action should be executed, false if it should be stopped
  */
 function roles_actions_permissions($hook_name, $type, $return_value, $params) {
+
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'actions');
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $action => $perm_details) {
-				if (roles_path_match(roles_replace_dynamic_paths($action), $type)) {
-					switch ($perm_details['rule']) {
-						case 'deny':
-							register_error(elgg_echo('roles:action:denied'));
-							return false;
-						case 'allow':
-						default:
-							break;
-					}
-				}
-			}
+	if (!$role instanceof \ElggRole) {
+		return;
+	}
+
+	$role_perms = roles_get_role_permissions($role, 'actions');
+	foreach ($role_perms as $action => $perm_details) {
+		if (!roles_path_match(roles_replace_dynamic_paths($action), $type)) {
+			continue;
+		}
+		switch ($perm_details['rule']) {
+			case 'deny':
+				register_error(elgg_echo('roles:action:denied'));
+				return false;
+			case 'allow':
+			default:
+				break;
 		}
 	}
 }
@@ -178,45 +181,46 @@ function roles_menus_permissions($hook_name, $type, $return_value, $params) {
 	// Ignore all triggered hooks except for 'menu:menu_name' type
 	list($hook_type, $prepared_menu_name) = explode(':', $type);
 
-	if (($hook_type == 'menu') && !empty($prepared_menu_name)) {
-		$role = roles_get_role();
-		if (elgg_instanceof($role, 'object', 'role')) {
-			$role_perms = roles_get_role_permissions($role, 'menus');
+	if ($hook_type !== 'menu' || empty($prepared_menu_name)) {
+		return;
+	}
 
-			if (is_array($role_perms) && !empty($role_perms)) {
+	$role = roles_get_role();
+	if (!$role instanceof ElggRole) {
+		return;
+	}
 
-				foreach ($role_perms as $menu => $perm_details) {
+	$role_perms = roles_get_role_permissions($role, 'menus');
+	foreach ($role_perms as $menu => $perm_details) {
 
-					$menu_parts = explode('::', $menu);
-					$menu_name = isset($menu_parts[0]) ? $menu_parts[0] : "";
+		$menu_parts = explode('::', $menu);
+		$menu_name = isset($menu_parts[0]) ? $menu_parts[0] : "";
 
-					// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
-					if (roles_check_context($perm_details)) {
-						// Try to act on this permission rule
-						switch ($perm_details['rule']) {
-							case 'deny':
-								$updated_menu = roles_unregister_menu_item_recursive($updated_menu, $menu, $prepared_menu_name);
-								break;
-							case 'extend':
-								if ($menu_name === $prepared_menu_name) {
-									$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
-									$menu_obj = ElggMenuItem::factory($menu_item);
-									elgg_register_menu_item($menu_name, $menu_obj);
-									$updated_menu = roles_get_menu($menu_name);
-								}
-								break;
-							case 'replace':
-								$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
-								$menu_obj = ElggMenuItem::factory($menu_item);
-								$updated_menu = roles_replace_menu_item_recursive($updated_menu, $menu, $prepared_menu_name, $menu_obj);
-								break;
-							case 'allow':
-							default:
-								break;
-						}
-					}
+		// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
+		if (!roles_check_context($perm_details)) {
+			continue;
+		}
+		// Try to act on this permission rule
+		switch ($perm_details['rule']) {
+			case 'deny':
+				$updated_menu = roles_unregister_menu_item_recursive($updated_menu, $menu, $prepared_menu_name);
+				break;
+			case 'extend':
+				if ($menu_name === $prepared_menu_name) {
+					$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+					$menu_obj = ElggMenuItem::factory($menu_item);
+					elgg_register_menu_item($menu_name, $menu_obj);
+					$updated_menu = roles_get_menu($menu_name);
 				}
-			}
+				break;
+			case 'replace':
+				$menu_item = roles_prepare_menu_vars($perm_details['menu_item']);
+				$menu_obj = ElggMenuItem::factory($menu_item);
+				$updated_menu = roles_replace_menu_item_recursive($updated_menu, $menu, $prepared_menu_name, $menu_obj);
+				break;
+			case 'allow':
+			default:
+				break;
 		}
 	}
 	// Return the updated menu to the hook triggering function (elgg_view_menu)
@@ -234,34 +238,36 @@ function roles_menus_permissions($hook_name, $type, $return_value, $params) {
  */
 function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'pages');
-		$page_path = $return_value['handler'] . '/' . implode('/', $return_value['segments']);
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $page => $perm_details) {
-				if (roles_path_match(roles_replace_dynamic_paths($page), $page_path)) {
-					switch ($perm_details['rule']) {
-						case 'deny':
-							register_error(elgg_echo('roles:page:denied'));
-							if (isset($perm_details['forward'])) {
-								forward($perm_details['forward']);
-							} else {
-								forward(REFERER);
-							}
-							break;
-						case 'redirect':
-							if (isset($perm_details['forward'])) {
-								forward($perm_details['forward']);
-							} else {
-								forward(REFERER);
-							}
-							break;
-						case 'allow':
-						default:
-							break;
-					}
+	if (!$role instanceof ElggRole) {
+		return;
+	}
+	$role_perms = roles_get_role_permissions($role, 'pages');
+	$page_path = $return_value['handler'] . '/' . implode('/', $return_value['segments']);
+
+	foreach ($role_perms as $page => $perm_details) {
+		if (!roles_path_match(roles_replace_dynamic_paths($page), $page_path)) {
+			continue;
+		}
+
+		switch ($perm_details['rule']) {
+			case 'deny':
+				register_error(elgg_echo('roles:page:denied'));
+				if (isset($perm_details['forward'])) {
+					forward($perm_details['forward']);
+				} else {
+					forward(REFERER);
 				}
-			}
+				break;
+			case 'redirect':
+				if (isset($perm_details['forward'])) {
+					forward($perm_details['forward']);
+				} else {
+					forward(REFERER);
+				}
+				break;
+			case 'allow':
+			default:
+				break;
 		}
 	}
 }
@@ -278,44 +284,45 @@ function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 function roles_hooks_permissions($event, $event_type, $object) {
 
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'hooks');
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $hook => $perm_details) {
-				list($hook_name, $type) = explode('::', $hook);
-				if (!$type) {
-					$type = 'all';
+	if (!$role instanceof ElggRole) {
+		return;
+	}
+
+	$role_perms = roles_get_role_permissions($role, 'hooks');
+	foreach ($role_perms as $hook => $perm_details) {
+		list($hook_name, $type) = explode('::', $hook);
+		if (!$type) {
+			$type = 'all';
+		}
+		switch ($perm_details['rule']) {
+			case 'deny':
+				$params = $perm_details['hook'];
+				if (is_array($params)) {
+					$handler = $params['handler'];
+					elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
+				} else {
+					global $CONFIG;
+					unset($CONFIG->hooks[$hook_name][$type]);
 				}
-				switch ($perm_details['rule']) {
-					case 'deny':
-						$params = $perm_details['hook'];
-						if (is_array($params)) {
-							$handler = $params['handler'];
-							elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
-						} else {
-							global $CONFIG;
-							unset($CONFIG->hooks[$hook_name][$type]);
-						}
-						break;
-					case 'extend':
-						$params = $perm_details['hook'];
-						$handler = $params['handler'];
-						$priority = isset($params['priority']) ? $params['priority'] : 500;
-						elgg_register_plugin_hook_handler($hook_name, $type, $handler, $priority);
-						break;
-					case 'replace':
-						$params = $perm_details['hook'];
-						$old_handler = $params['old_handler'];
-						$new_handler = $params['new_handler'];
-						$priority = isset($params['priority']) ? $params['priority'] : 500;
-						elgg_unregister_plugin_hook_handler($hook_name, $type, $old_handler);
-						elgg_register_plugin_hook_handler($hook_name, $type, $new_handler, $priority);
-						break;
-					case 'allow':
-					default:
-						break;
-				}
-			}
+				break;
+			case 'extend':
+				$params = $perm_details['hook'];
+				$handler = $params['handler'];
+				$priority = isset($params['priority']) ? $params['priority'] : 500;
+				elgg_register_plugin_hook_handler($hook_name, $type, $handler, $priority);
+				break;
+			case
+
+			'replace': $params = $perm_details['hook'];
+				$old_handler = $params['old_handler'];
+				$new_handler = $params['new_handler'];
+				$priority = isset($params['priority']) ? $params['priority'] : 500;
+				elgg_unregister_plugin_hook_handler($hook_name, $type, $old_handler);
+				elgg_register_plugin_hook_handler($hook_name, $type, $new_handler, $priority);
+				break;
+			case 'allow':
+			default:
+				break;
 		}
 	}
 
@@ -334,47 +341,47 @@ function roles_hooks_permissions($event, $event_type, $object) {
 function roles_events_permissions($event, $event_type, $object) {
 
 	$role = roles_get_role();
-	if (elgg_instanceof($role, 'object', 'role')) {
-		$role_perms = roles_get_role_permissions($role, 'events');
-		if (is_array($role_perms) && !empty($role_perms)) {
-			foreach ($role_perms as $event => $perm_details) {
-				list($event_name, $type) = explode('::', $event);
-				if (!$type) {
-					$type = 'all';
-				}
-				switch ($perm_details['rule']) {
-					case 'deny':
-						$params = $perm_details['event'];
-						if (is_array($params)) {
-							$handler = $params['handler'];
-							elgg_unregister_event_handler($event_name, $type, $handler);
-						} else {
-							global $CONFIG;
-							unset($CONFIG->events[$event_name][$type]);
-						}
-						break;
-					case 'extend':
-						$params = $perm_details['event'];
-						$handler = $params['handler'];
-						$priority = isset($params['priority']) ? $params['priority'] : 500;
-						elgg_register_event_handler($event_name, $type, $handler, $priority);
-						break;
-					case 'replace':
-						$params = $perm_details['hook'];
-						$old_handler = $params['old_handler'];
-						$new_handler = $params['new_handler'];
-						$priority = isset($params['priority']) ? $params['priority'] : 500;
-						elgg_unregister_event_handler($event_name, $type, $old_handler);
-						elgg_register_event_handler($event_name, $type, $new_handler, $priority);
-						break;
-					case 'allow':
-					default:
-						break;
-				}
-			}
-		}
+	if (!$role instanceof ElggRole) {
+		return;
 	}
 
+	$role_perms = roles_get_role_permissions($role, 'events');
+	foreach ($role_perms as $event => $perm_details) {
+		list($event_name, $type) = explode(': :', $event);
+		if (!$type) {
+			$type = 'all';
+		}
+		switch ($perm_details['rule']) {
+			case 'deny':
+				$params = $perm_details['event'];
+				if (is_array($params)) {
+					$handler = $params['handler'];
+					elgg_unregister_event_handler($event_name, $type, $handler);
+				} else {
+					global $CONFIG;
+					unset($CONFIG->events[$event_name][$type]);
+				}
+				break;
+			case 'extend':
+				$params = $perm_details['event'];
+				$handler = $params['handler'];
+				$priority = isset($params['priority']) ? $params['priority'] :
+						500;
+				elgg_register_event_handler($event_name, $type, $handler, $priority);
+				break;
+			case 'replace':
+				$params = $perm_details['hook'];
+				$old_handler = $params['old_handler'];
+				$new_handler = $params['new_handler'];
+				$priority = isset($params['priority']) ? $params['priority'] : 500;
+				elgg_unregister_event_handler($event_name, $type, $old_handler);
+				elgg_register_event_handler($event_name, $type, $new_handler, $priority);
+				break;
+			case 'allow':
+			default:
+				break;
+		}
+	}
 	return true;
 }
 
@@ -404,8 +411,6 @@ function roles_user_settings_save($hook_name, $entity_type, $return_value, $para
 		system_message(elgg_echo('user:role:success'));
 		return true;
 	}
-
-	return null;
 }
 
 /**
