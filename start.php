@@ -364,8 +364,11 @@ function roles_events_permissions($event, $event_type, $object) {
 					$handler = $params['handler'];
 					elgg_unregister_event_handler($event_name, $type, $handler);
 				} else {
-					global $CONFIG;
-					unset($CONFIG->events[$event_name][$type]);
+					// @TODO: Update when https://github.com/Elgg/Elgg/issues/9113 is fixed
+					$handlers = _elgg_services()->events->getOrderedHandlers($event_name, $type);
+					foreach ($handlers as $handler) {
+						elgg_unregister_event_handler($event_name, $type, $handler);
+					}
 				}
 				break;
 			case 'extend':
