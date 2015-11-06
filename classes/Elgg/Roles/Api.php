@@ -286,9 +286,9 @@ class Api {
 	public function checkUpdate() {
 		$hash = elgg_get_plugin_setting('roles_hash', 'roles');
 		$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
-		
+
 		$current_hash = sha1(serialize($roles_array));
-		
+
 		if ($hash != $current_hash) {
 			roles_create_from_config($roles_array);
 			elgg_set_plugin_setting('roles_hash', $current_hash, 'roles');

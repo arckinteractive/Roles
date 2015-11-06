@@ -15,13 +15,13 @@ class ElggRole extends ElggObject {
 
 	/**
 	 * Protected permissions metadata
-	 * @var string 
+	 * @var string
 	 */
 	protected $permissions;
 
 	/**
 	 * Protected extends metdata
-	 * @var string[] 
+	 * @var string[]
 	 */
 	protected $extends;
 
@@ -46,7 +46,7 @@ class ElggRole extends ElggObject {
 	 * @return void
 	 */
 	public function setPermissions($permissions = array()) {
-		$this->permissions = serialize($permissions);
+		$this->setMetadata('permissions', serialize($permissions));
 	}
 
 	/**
@@ -54,7 +54,7 @@ class ElggRole extends ElggObject {
 	 * @return array
 	 */
 	public function getPermissions() {
-		$permissions = unserialize($this->permissions);
+		$permissions = unserialize($this->getMetadata('permissions'));
 		if (!is_array($permissions)) {
 			return array();
 		}
@@ -77,7 +77,7 @@ class ElggRole extends ElggObject {
 	 * @return void
 	 */
 	public function setExtends($extends = array()) {
-		$this->extends = $extends;
+		$this->setMetadata('extends', $extends);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class ElggRole extends ElggObject {
 	 * @return string[]
 	 */
 	public function getExtends() {
-		return (array) $this->extends;
+		return (array) $this->getMetadata('extends');
 	}
 
 	/**
