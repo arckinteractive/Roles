@@ -2,6 +2,7 @@
 
 namespace Elgg\Roles;
 
+use ElggUser;
 use PHPUnit_Framework_TestCase;
 
 class ApiTest extends PHPUnit_Framework_TestCase {
@@ -66,12 +67,25 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(Api::DEFAULT_ROLE, $this->api->filterName(Api::DEFAULT_ROLE));
 		$this->assertEquals('tester1', $this->api->filterName('tester1'));
 		
-		$user = new \ElggUser();
+		$user = new ElggUser();
 		$this->assertEquals(Api::DEFAULT_ROLE, $this->api->filterName(Api::NO_ROLE, $user));
 
-		$admin = new \ElggUser();
+		$admin = new ElggUser();
 		$admin->admin = true;
 		$this->assertEquals(Api::ADMIN_ROLE, $this->api->filterName(Api::NO_ROLE, $admin));
 
+	}
+
+	public function testSetGetRole() {
+
+		$user = new ElggUser();
+
+		$role = $this->api->getRoleByName('tester1');
+		$this->api->setRole($user, $role);
+		$this->assertEquals($role, $this->api->getRole($user));
+
+		$role = $this->api->getRoleByName(Api::DEFAULT_ROLE);
+		$this->api->setRole($user, $role);
+		$this->assertEquals($role, $this->api->getRole($user));
 	}
 }

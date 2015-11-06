@@ -1,5 +1,7 @@
 <?php
 
+use Elgg\Roles\Api;
+
 /**
  * Roles library functions
  *
@@ -16,7 +18,11 @@
  * @return ElggRole The role the user belongs to
  */
 function roles_get_role($user = null) {
-	return roles()->getRole($user);
+	$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
+	if ($user instanceof ElggUser) {
+		return roles()->getRole($user);
+	}
+	return roles()->getRoleByName(roles()->filterName(Api::NO_ROLE));
 }
 
 /**
@@ -37,7 +43,11 @@ function roles_has_role($user = null, $role_name = DEFAULT_ROLE) {
  * @return bool|void True if the role change was successful, false if could not update user role, and null if there was no change in user role
  */
 function roles_set_role($role, $user = null) {
-	return roles()->setRole($role, $user);
+	$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
+	if ($user instanceof ElggUser && $role instanceof ElggRole) {
+		return roles()->setRole($user, $role);
+	}
+	return false;
 }
 
 /**

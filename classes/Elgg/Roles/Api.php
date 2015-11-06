@@ -44,26 +44,9 @@ class Api {
 	 * @param ElggUser $user User entity
 	 * @return ElggRole The role the user belongs to
 	 */
-	public function getRole(ElggUser $user = null) {
-
-		$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
-
-		if ($user instanceof ElggUser) {
-			$options = array(
-				'type' => 'object',
-				'subtype' => 'role',
-				'relationship' => 'has_role',
-				'relationship_guid' => $user->guid,
-			);
-			$roles = elgg_get_entities_from_relationship($options);
-
-			if (is_array($roles) && !empty($roles)) {
-				return $roles[0];
-			}
-		}
-
-		// Couldn't find role for the current user, or there is no logged in user
-		return roles_get_role_by_name($this->filterName(self::NO_ROLE, $user));
+	public function getRole(ElggUser $user) {
+		$role = $this->db->getUserRole($user);
+		return $role ? : $this->getRoleByName($this->filterName(self::NO_ROLE, $user));
 	}
 
 	/**
@@ -72,58 +55,45 @@ class Api {
 	 * @param ElggUser $user User entity
 	 * @return bool True if the user belongs to the passed role, false otherwise
 	 */
-	public function hasRole(ElggUser $user = null, $role_name = self::DEFAULT_ROLE) {
-
-		$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
-		if (!$user instanceof ElggUser) {
-			return false;
-		}
-
-		$options = array(
-			'type' => 'object',
-			'subtype' => 'role',
-			'metadata_name_value_pairs' => array('name' => 'name', 'value' => $role_name, 'operand' => '='),
-			'relationship' => 'has_role',
-			'relationship_guid' => $user->guid,
-		);
-		$roles = elgg_get_entities_from_relationship($options);
-
-
-		if (is_array($roles) && !empty($roles)) {
-			return true;
-		}
-		return false;
+	public function hasRole(ElggUser $user, $role_name = self::DEFAULT_ROLE) {
+		return $this->getRole($user)->name == $role_name;
 	}
 
 	/**
 	 * Assigns a role to a particular user
 	 *
-	 * @param ElggRole $role The role to be assigned
 	 * @param ElggUser $user The user the role needs to be assigned to
+	 * @param ElggRole $role The role to be assigned
 	 * @return bool|void True if the role change was successful, false if could not update user role, and null if there was no change in user role
 	 */
-	public function setRole(ElggRole $role, ElggUser $user = null) {
-		if (!$role instanceof ElggRole) {
-			return false; // Couldn't set new role
+	public function setRole(ElggUser $user, ElggRole $role) {
+
+		$current_role = $this->getRole($user);
+		if ($role->name == $current_role->name) {
+			// There was no change necessary, old and new role are the same
+			return;
 		}
 
-		$user = isset($user) ? $user : elgg_get_logged_in_user_entity();
-		if (!$user instanceof ElggUser) {
-			return false; // Couldn't set new role
+		if (!$this->unsetRole($user)) {
+			return false;
+		}
+		
+		if ($role->isReservedRole()) {
+			// Changed to reserved role which is resolved without relationships
+			return true;
 		}
 
-		$current_role = roles_get_role($user);
-		if ($role != $current_role) {
-			remove_entity_relationships($user->guid, 'has_role');
-			if (($role->name != self::DEFAULT_ROLE) && ($role->name != self::ADMIN_ROLE)) {
-				if (!add_entity_relationship($user->guid, 'has_role', $role->guid)) {
-					return false; // Couldn't set new role
-				}
-			}
-			return true; // Role has been changed
-		}
+		return $this->db->setUserRole($user, $role);
+	}
 
-		return null; // There was no change necessary, old and new role are the same
+	/**
+	 * Clear user roles
+	 * 
+	 * @param ElggUser $user User entity
+	 * @return bool
+	 */
+	public function unsetRole(ElggUser $user) {
+		return $this->db->unsetUserRole($user);
 	}
 
 	/**

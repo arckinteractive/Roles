@@ -34,4 +34,33 @@ class Db implements \Elgg\Roles\DbInterface {
 		return $role_array ? $role_array[0] : false;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getUserRole(\ElggUser $user) {
+		$options = array(
+			'type' => 'object',
+			'subtype' => 'role',
+			'relationship' => 'has_role',
+			'relationship_guid' => $user->guid,
+			'limit' => 1,
+		);
+		$roles = elgg_get_entities_from_relationship($options);
+		return $roles ? $roles[0] : false;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setUserRole(\ElggUser $user, \ElggRole $role) {
+		return (bool) add_entity_relationship($user->guid, 'has_role', $role->guid);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function unsetUserRole(\ElggUser $user) {
+		return (bool) remove_entity_relationships($user->guid, 'has_role');
+	}
+
 }

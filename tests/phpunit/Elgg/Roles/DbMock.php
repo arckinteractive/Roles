@@ -18,7 +18,7 @@ class DbMock implements DbInterface {
 			),
 		),
 		'tester1' => array(
-			'title' => 'roles:role:ADMIN_ROLE',
+			'title' => 'tester1',
 			'extends' => array('default'),
 			'permissions' => array(
 				'actions' => array(
@@ -29,7 +29,7 @@ class DbMock implements DbInterface {
 			),
 		),
 		'tester2' => array(
-			'title' => 'roles:role:ADMIN_ROLE',
+			'title' => 'tester2',
 			'extends' => array('default'),
 			'permissions' => array(
 				'actions' => array(
@@ -62,6 +62,20 @@ class DbMock implements DbInterface {
 		$role->setPermissions($conf['permissions']);
 
 		return $role;
+	}
+
+	public function getUserRole(\ElggUser $user) {
+		return $user->getVolatileData('role');
+	}
+
+	public function setUserRole(\ElggUser $user, ElggRole $role) {
+		$user->setVolatileData('role', $role);
+		return true;
+	}
+
+	public function unsetUserRole(\ElggUser $user) {
+		$user->setVolatileData('role', null);
+		return true;
 	}
 
 }
