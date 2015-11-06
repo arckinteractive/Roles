@@ -73,7 +73,6 @@ function roles_get_all_selectable_roles() {
 /**
  * Obtains a list of permissions associated with a particular role object
  *
- * @global array $PERMISSIONS_CACHE In-memory cache for role permission
  * @param ElggRole $role            The role to check for permissions
  * @param string   $permission_type The section from the configuration array ('actions', 'menus', 'views', etc.)
  * @return array The permission rules for the given role and permission type
@@ -86,7 +85,6 @@ function roles_get_role_permissions($role = null, $permission_type = null) {
 /**
  * Caches permissions associated with a role object. Also resolves all role extensions.
  *
- * @global array $PERMISSIONS_CACHE In-memory cache for role permission
  * @param ElggRole $role The role to cache permissions for
  * @return void
  */
