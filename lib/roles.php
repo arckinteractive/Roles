@@ -79,6 +79,7 @@ function roles_get_all_selectable_roles() {
  * @return array The permission rules for the given role and permission type
  */
 function roles_get_role_permissions($role = null, $permission_type = null) {
+	$role = isset($role) ? $role : roles_get_role();
 	return roles()->getPermissions($role, $permission_type);
 }
 

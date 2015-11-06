@@ -134,13 +134,7 @@ class Api {
 	 * @param string   $permission_type The section from the configuration array ('actions', 'menus', 'views', etc.)
 	 * @return array The permission rules for the given role and permission type
 	 */
-	public function getPermissions(ElggRole $role = null, $permission_type = null) {
-
-		$role = isset($role) ? $role : $this->getRole();
-		if (!$role instanceof ElggRole) {
-			return array();
-		}
-
+	public function getPermissions(ElggRole $role, $permission_type = null) {
 		if (!isset($this->cache[$role->name])) {
 			$this->cachePermissions($role);
 		}
