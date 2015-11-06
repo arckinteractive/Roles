@@ -353,7 +353,7 @@ function roles_events_permissions($event, $event_type, $object) {
 
 	$role_perms = roles_get_role_permissions($role, 'events');
 	foreach ($role_perms as $event => $perm_details) {
-		list($event_name, $type) = explode(': :', $event);
+		list($event_name, $type) = explode('::', $event);
 		if (!$type) {
 			$type = 'all';
 		}
@@ -371,8 +371,7 @@ function roles_events_permissions($event, $event_type, $object) {
 			case 'extend':
 				$params = $perm_details['event'];
 				$handler = $params['handler'];
-				$priority = isset($params['priority']) ? $params['priority'] :
-						500;
+				$priority = isset($params['priority']) ? $params['priority'] : 500;
 				elgg_register_event_handler($event_name, $type, $handler, $priority);
 				break;
 			case 'replace':
