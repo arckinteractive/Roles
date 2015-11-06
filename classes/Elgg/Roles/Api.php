@@ -63,7 +63,7 @@ class Api {
 		}
 
 		// Couldn't find role for the current user, or there is no logged in user
-		return roles_get_role_by_name(roles_filter_role_name(self::NO_ROLE, $user->guid));
+		return roles_get_role_by_name($this->filterName(self::NO_ROLE, $user));
 	}
 
 	/**
@@ -239,28 +239,20 @@ class Api {
 	/**
 	 * Resolves the default role for specified or currently logged in user
 	 *
-	 * @param string $role_name The name of the user's role
-	 * @param int    $user_guid GUID of the user whose default role needs to be resolved
+	 * @param string    $role_name The name of the user's role
+	 * @param \ElggUser $user      User whose default role needs to be resolved
 	 * @return string
 	 */
-	public function filterName($role_name, $user_guid = null) {
+	public function filterName($role_name, \ElggUser $user = null) {
 		if ($role_name !== self::NO_ROLE) {
 			return $role_name;
 		}
 
-		if ($user_guid) {
-			if (elgg_is_admin_user((int) $user_guid)) {
-				return self::ADMIN_ROLE;
-			} else {
-				return self::DEFAULT_ROLE;
-			}
-		} else if (!elgg_is_logged_in()) {
-			return self::VISITOR_ROLE;
-		} else if (elgg_is_admin_logged_in()) {
-			return self::ADMIN_ROLE;
-		} else {
-			return self::DEFAULT_ROLE;
+		if ($user instanceof \ElggUser) {
+			return $user->isAdmin() ? self::ADMIN_ROLE : self::DEFAULT_ROLE;
 		}
+
+		return self::VISITOR_ROLE;
 	}
 
 	/**
