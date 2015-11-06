@@ -138,7 +138,7 @@ class Api {
 
 		$role = isset($role) ? $role : $this->getRole();
 		if (!$role instanceof ElggRole) {
-			return false;
+			return array();
 		}
 
 		if (!isset($this->cache[$role->name])) {
@@ -146,9 +146,9 @@ class Api {
 		}
 
 		if ($permission_type) {
-			return (isset($this->cache[$role->name][$permission_type])) ? $this->cache[$role->name][$permission_type] : null;
+			return (isset($this->cache[$role->name][$permission_type])) ? (array) $this->cache[$role->name][$permission_type] : array();
 		} else {
-			return $this->cache[$role->name];
+			return (array) $this->cache[$role->name];
 		}
 	}
 
