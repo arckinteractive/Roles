@@ -233,17 +233,7 @@ class Api {
 
 		elgg_log('Creating roles from config', 'DEBUG');
 
-		$options = array(
-			'type' => 'object',
-			'subtype' => 'role',
-			'limit' => false // we need all roles
-		);
-		$roles = elgg_get_entities($options);
-
-		$existing_roles = array();
-		foreach ($roles as $role) {
-			$existing_roles[$role->name] = $role;
-		}
+		$existing_roles = $this->getAll();
 
 		foreach ($roles_array as $rname => $rdetails) {
 			$current_role = $existing_roles[$rname];
@@ -296,9 +286,9 @@ class Api {
 	public function checkUpdate() {
 		$hash = elgg_get_plugin_setting('roles_hash', 'roles');
 		$roles_array = elgg_trigger_plugin_hook('roles:config', 'role', array(), null);
-
+		
 		$current_hash = sha1(serialize($roles_array));
-
+		
 		if ($hash != $current_hash) {
 			roles_create_from_config($roles_array);
 			elgg_set_plugin_setting('roles_hash', $current_hash, 'roles');
