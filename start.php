@@ -301,8 +301,14 @@ function roles_hooks_permissions($event, $event_type, $object) {
 					$handler = $params['handler'];
 					elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
 				} else {
-					global $CONFIG;
-					unset($CONFIG->hooks[$hook_name][$type]);
+					if (is_callable('elgg_clear_plugin_hook_handlers')) {
+						elgg_clear_plugin_hook_handlers($hook_name, $type);
+					} else {
+						$handlers = _elgg_services()->hooks->getOrderedHandlers($hook_name, $type);
+						foreach ($handlers as $handler) {
+							elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
+						}
+					}
 				}
 				break;
 			case 'extend':
