@@ -88,4 +88,34 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->api->setRole($user, $role);
 		$this->assertEquals($role, $this->api->getRole($user));
 	}
+
+	public function testContext() {
+
+		elgg_push_context('foo');
+		elgg_push_context('bar');
+
+		$this->assertFalse($this->api->checkContext(['context' => 'baz']));
+		$this->assertTrue($this->api->checkContext(['context' => 'foo']));
+		$this->assertTrue($this->api->checkContext(['context' => 'bar']));
+		$this->assertTrue($this->api->checkContext(['context' => ['foo', 'bar']]));
+		$this->assertTrue($this->api->checkContext(['context' => ['bar']]));
+
+		elgg_pop_context();
+		elgg_pop_context();
+	}
+
+	public function testContextStrict() {
+
+		elgg_push_context('foo');
+		elgg_push_context('bar');
+
+		$this->assertTrue($this->api->checkContext(['context' => 'bar'], true));
+		$this->assertFalse($this->api->checkContext(['context' => 'baz'], true));
+		$this->assertFalse($this->api->checkContext(['context' => 'foo'], true));
+		$this->assertTrue($this->api->checkContext(['context' => ['foo', 'bar']], true));
+		$this->assertTrue($this->api->checkContext(['context' => ['bar']], true));
+
+		elgg_pop_context();
+		elgg_pop_context();
+	}
 }

@@ -77,7 +77,7 @@ class Api {
 		if (!$this->unsetRole($user)) {
 			return false;
 		}
-		
+
 		if ($role->isReservedRole()) {
 			// Changed to reserved role which is resolved without relationships
 			return true;
@@ -534,16 +534,18 @@ class Api {
 	 * @return bool True if the rule should be executed, false otherwise
 	 */
 	public function checkContext($permission_details, $strict = false) {
-		global $CONFIG;
-		$result = true;
-		if (is_array($permission_details['context'])) {
-			if ($strict) {
-				$result = in_array(elgg_get_context(), $permission_details['context']);
-			} else {
-				$result = count(array_intersect($permission_details['context'], $CONFIG->context)) > 0;
-			}
+		$context = elgg_extract('context', $permission_details);
+		if (!isset($context)) {
+			return true;
 		}
-		return $result;
+		if (!is_array($context)) {
+			$context = array($context);
+		}
+		if ($strict) {
+			return in_array(elgg_get_context(), $context);
+		}
+		$stack = (array) elgg_get_context_stack();
+		return count(array_intersect($context, $stack)) > 0;
 	}
 
 	/**
