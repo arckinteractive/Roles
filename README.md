@@ -1,5 +1,8 @@
 Roles for Elgg
 ==============
+![Elgg 1.11](https://img.shields.io/badge/Elgg-1.11.x-orange.svg?style=flat-square)
+![Elgg 1.12](https://img.shields.io/badge/Elgg-1.12.x-orange.svg?style=flat-square)
+![Elgg 2.0](https://img.shields.io/badge/Elgg-2.0.x-orange.svg?style=flat-square)
 
 This project implements user roles for Elgg, providing more granular control over the site than Elgg's default user distinction.
 
@@ -9,6 +12,17 @@ By using this plugin, you can easily introduce custom roles, restricting groups 
 
 Please understand that the Roles plugin, in its current state, **is rather a framework than a full stand-alone plugin.**
 You'll need to make additional tweaks, or use extension plugins, to make the custom roles work.
+
+
+## Installation
+
+```sh
+# from project root
+composer require -g composer/installers
+composer require arckinteractive/roles:~2.0
+# run tests
+phpunit
+```
 
 ## Introduction
 

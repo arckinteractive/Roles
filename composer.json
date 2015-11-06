@@ -20,14 +20,8 @@
 			"name": "Ismayil Khayredinov"
 		}
 	],
-	"extra": {
-		"installer-name": "roles"
-	},
-	"require": {
-		"php": ">=5.3.3",
-		"composer/installers": ">=1.0.8"
-	},
 	"require-dev": {
+		"composer/installers": "~1.0",
 		"phpunit/phpunit": "~4.1"
 	},
 	"autoload": {
