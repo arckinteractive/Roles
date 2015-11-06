@@ -582,3 +582,12 @@ extension plugin:
  *  In your manifest file, use the `<requires>` tag to indicate that your plugin is dependent on the roles plugin.
  *  In your role configuration hook, use graceful role definition: instead of just returning the new role definition array, merge it with the previously existing array.
  *  Keep security in mind. It's usually not enough just to remove an item from a given menu – you'll want to deny access to corresponding pages and actions as well.
+
+
+## Upgrading
+
+### From 1.x
+
+ * Cache is no longer written to the global `$PERMISSIONS_CACHE`. It is not a private property of the `\Elgg\Roles\Api` class
+ * `extends` and `permissions` metadata of the `ElggRole` object can no longer be access directly. Use `ElggRole::setExtends()`, `ElggRole::getExtends()`, `ElggRole:setPermissions()` and `ElggRole::getPermissions()`
+ * `title` attribute of the `ElggRole` object is now stored as a raw string. Use `ElggRole::getDisplayName()` to display an i18n title
