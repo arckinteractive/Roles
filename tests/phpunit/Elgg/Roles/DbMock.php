@@ -41,9 +41,20 @@ class DbMock implements DbInterface {
 		),
 	);
 
+	public function getAllRoles() {
+		$roles = array();
+		foreach (array_keys($this->conf) as $name) {
+			$roles[] = $this->getRoleByName($name);
+		}
+		return $roles;
+	}
+
 	public function getRoleByName($role_name = '') {
 
-		$conf = isset($this->conf[$role_name]) ? $this->conf[$role_name] : $this->conf['default'];
+		if (!isset($this->conf[$role_name])) {
+			return false;
+		}
+		$conf = $this->conf[$role_name];
 		$role = new ElggRole();
 		$role->name = $role_name;
 		$role->title = $conf['title'];

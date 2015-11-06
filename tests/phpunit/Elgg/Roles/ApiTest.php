@@ -43,4 +43,20 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $this->api->getPermissions($this->api->getRoleByName('tester1'), 'actions'));
 	}
 
+	public function testGetRoleByName() {
+
+		$role =  $this->api->getRoleByName('default');
+		$this->assertInstanceOf('\ElggRole', $role);
+		$this->assertEquals('default', $role->name);
+
+		$this->assertFalse($this->api->getRoleByName('foo'));
+	}
+
+	public function testGetSelectable() {
+
+		$selectable = $this->api->getSelectable();
+		$this->assertContains($this->api->getRoleByName('tester1'), $selectable);
+		$this->assertContains($this->api->getRoleByName('tester2'), $selectable);
+		$this->assertNotContains($this->api->getRoleByName('default'), $selectable);
+	}
 }

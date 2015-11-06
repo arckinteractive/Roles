@@ -131,13 +131,15 @@ class Api {
 	 * @return ElggRole[]|false An array of ElggRole objects defined in the system, or false if none found
 	 */
 	public function getAll() {
-
-		$options = array(
-			'type' => 'object',
-			'subtype' => 'role',
-			'limit' => 0
-		);
-		return elgg_get_entities($options);
+		if (!isset($this->roles)) {
+			$this->roles = array();
+			$roles = $this->db->getAllRoles();
+			foreach ($roles as $role) {
+				/* @var $role \ElggRole */
+				$this->roles[$role->name] = $role;
+			}
+		}
+		return $this->roles;
 	}
 
 	/**
@@ -149,21 +151,10 @@ class Api {
 	 * @return ElggRole[]|false An array of non-default ElggRole objects defined in the system, or false if none found
 	 */
 	public function getSelectable() {
-
-		$dbprefix = elgg_get_config('dbprefix');
-		$reserved_role_names = "('" . implode("','", $this->getReservedRoleNames()) . "')";
-		$options = array(
-			'type' => 'object',
-			'subtype' => 'role',
-			'limit' => 0,
-			'joins' => array(
-				"INNER JOIN {$dbprefix}metadata m ON (m.entity_guid = e.guid)",
-				"INNER JOIN {$dbprefix}metastrings s1 ON (s1.id = m.name_id AND s1.string = 'name')",
-				"INNER JOIN {$dbprefix}metastrings s2 ON (s2.id = m.value_id)",
-			),
-			'wheres' => array("s2.string NOT IN $reserved_role_names")
-		);
-		return elgg_get_entities($options);
+		$roles = $this->getAll();
+		return array_filter($roles, function(\ElggRole $role) {
+			return !$role->isReservedRole();
+		});
 	}
 
 	/**
@@ -241,10 +232,8 @@ class Api {
 	 * @return ElggRole|false An ElggRole object if it could be found based on the name, false otherwise
 	 */
 	public function getRoleByName($role_name = '') {
-		if (!isset($this->roles[$role_name])) {
-			$this->roles[$role_name] = $this->db->getRoleByName($role_name);
-		}
-		return $this->roles[$role_name];
+		$roles = $this->getAll();
+		return isset($roles[$role_name]) ? $roles[$role_name] : false;
 	}
 
 	/**
