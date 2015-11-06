@@ -9,13 +9,11 @@
  * @copyright Arck Interactive, LLC 2012
  * @link http://www.arckinteractive.com/
  */
-
 require_once __DIR__ . '/autoloader.php';
 require_once __DIR__ . '/lib/roles.php';
 require_once __DIR__ . '/lib/config.php';
 
 /**
- *
  * Default role constants definitions
  */
 define('DEFAULT_ROLE', \Elgg\Roles\Api::DEFAULT_ROLE);
@@ -24,16 +22,16 @@ define('VISITOR_ROLE', \Elgg\Roles\Api::VISITOR_ROLE);
 define('NO_ROLE', \Elgg\Roles\Api::NO_ROLE);
 
 /**
- *
  * Register Roles plugin's init function
  */
 elgg_register_event_handler('init', 'system', 'roles_init');
 
 /**
- *
  * Initializes the Roles plugin
+ * @return void
  */
-function roles_init($event, $type, $object) {
+function roles_init() {
+
 	elgg_extend_view('forms/useradd', 'roles/useradd');
 
 	// Provides default roles by own handler. This should be extended by site specific handlers
@@ -45,25 +43,23 @@ function roles_init($event, $type, $object) {
 
 	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
 	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999);
-	
+
 	// Set up roles based hooks and event listener, after all plugin is initialized
 	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
 	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
 	elgg_register_event_handler('create', 'user', 'roles_create_user');
 
 	// Check for role configuration updates
-	if (elgg_is_admin_logged_in()) {	// @TODO think through if this should rather be a role-based permission
+	if (elgg_is_admin_logged_in()) { // @TODO think through if this should rather be a role-based permission
 		run_function_once('roles_update_100_to_101');
 		elgg_register_event_handler('ready', 'system', 'roles_check_update');
 	}
 
 	// Set up roles based view management
 	elgg_register_event_handler('ready', 'system', 'roles_register_views');
-
 }
 
 /**
- *
  * Processes view permissions from the role configuration array. This is called after the 'ready', 'system' event.
  *
  * For view extension and replacements the function simply calls the corresponding {@link elgg_extend_view()} and
@@ -74,11 +70,12 @@ function roles_init($event, $type, $object) {
  * there are hundreds of views contributing to any elgg page. Listening for all "views", "all" hooks would
  * be quite a waste.
  *
- * @param string $event Equals 'ready'
- * @param string $event_type Equals 'system'
- * @param mixed $object Not in use for this specific listener
-*/
-function roles_register_views($event, $type, $object) {
+ * @param string $event      "ready"
+ * @param string $event_type "system"
+ * @param mixed $object      Not in use for this specific listener
+ * @return void
+ */
+function roles_register_views($event, $event_type, $object) {
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'views');
@@ -111,15 +108,13 @@ function roles_register_views($event, $type, $object) {
 }
 
 /**
- *
  * A hook handler registered by {@link roles_register_views()} to suppress the outputs of certain views defined by
  * the role configuration array.
  *
- * @param string $hook_name Equals "view"
- * @param string $type The view name
- * @param mixed $return_value The original view output
- * @param mixed $params An associative array of parameters provided by the hook trigger
- *
+ * @param string $hook_name    "view"
+ * @param string $type         The view name
+ * @param mixed  $return_value The original view output
+ * @param mixed  $params       An associative array of parameters provided by the hook trigger
  * @return string	An empty string to suppress the output of the original view
  */
 function roles_views_permissions($hook_name, $type, $return_value, $params) {
@@ -137,19 +132,16 @@ function roles_views_permissions($hook_name, $type, $return_value, $params) {
 	}
 }
 
-
 /**
- *
  * Processes action permissions from the role configuration array. This is called upon each action execution.
  *
- * @param string $hook_name Equals "action"
- * @param string $type The registered action name
- * @param boolean $return_value
- * @param mixed $params An associative array of parameters provided by the hook trigger
-
- * @return boolean	True if the action should be executed, false if it should be stopped
+ * @param string  $hook_name    "action"
+ * @param string  $type         The registered action name
+ * @param boolean $return_value Return value
+ * @param mixed   $params       An associative array of parameters provided by the hook trigger
+ * @return boolean|void True if the action should be executed, false if it should be stopped
  */
-function roles_actions_permissions($hook, $type, $return_value, $params) {
+function roles_actions_permissions($hook_name, $type, $return_value, $params) {
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
 		$role_perms = roles_get_role_permissions($role, 'actions');
@@ -160,7 +152,6 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 						case 'deny':
 							register_error(elgg_echo('roles:action:denied'));
 							return false;
-							break;
 						case 'allow':
 						default:
 							break;
@@ -171,18 +162,16 @@ function roles_actions_permissions($hook, $type, $return_value, $params) {
 	}
 }
 
-
 /**
- *
  * Processes menu permissions from the role configuration array. This is called upon each "register" triggered hook.
  *
- * @param string $hook_name Equals "register"
- * @param string $type The triggered "register" hook's type
- * @param boolean $return_value
- * @param mixed $params An associative array of parameters provided by the hook trigger
+ * @param string  $hook_name    "register"
+ * @param string  $type         The triggered "register" hook's type
+ * @param boolean $return_value Return value
+ * @param mixed   $params       An associative array of parameters provided by the hook trigger
+ * @return void
  */
-
-function roles_menus_permissions($hook, $type, $return_value, $params) {
+function roles_menus_permissions($hook_name, $type, $return_value, $params) {
 
 	$updated_menu = $return_value;
 
@@ -193,7 +182,7 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 		$role = roles_get_role();
 		if (elgg_instanceof($role, 'object', 'role')) {
 			$role_perms = roles_get_role_permissions($role, 'menus');
-			
+
 			if (is_array($role_perms) && !empty($role_perms)) {
 
 				foreach ($role_perms as $menu => $perm_details) {
@@ -225,10 +214,8 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 							default:
 								break;
 						}
-
 					}
 				}
-
 			}
 		}
 	}
@@ -237,13 +224,13 @@ function roles_menus_permissions($hook, $type, $return_value, $params) {
 }
 
 /**
- *
  * Processes page permissions from the role configuration array. This is called upon each "route" triggered hook.
  *
- * @param string $hook_name Equals "route"
- * @param string $type The triggered "register" hook's type
- * @param mixed $return_value
- * @param mixed $params An associative array of parameters provided by the hook trigger
+ * @param string $hook_name    "route"
+ * @param string $type         The triggered "register" hook's type
+ * @param mixed  $return_value Return value
+ * @param mixed  $params       An associative array of parameters provided by the hook trigger
+ * @return void
  */
 function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 	$role = roles_get_role();
@@ -280,13 +267,12 @@ function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 }
 
 /**
- *
  * Processes hook permissions from the role configuration array. Triggered by the 'ready', 'system' event.
  * This is to make sure that all plugins' init functions have been executed, and all hook handlers have already been initialized
  *
- * @param string $event Equals 'ready'
- * @param string $event_type Equals 'system'
- * @param mixed $object Not in use for this specific listener
+ * @param string $event      "ready"
+ * @param string $event_type "system"
+ * @param mixed  $object     Not in use for this specific listener
  * @return boolean
  */
 function roles_hooks_permissions($event, $event_type, $object) {
@@ -336,18 +322,16 @@ function roles_hooks_permissions($event, $event_type, $object) {
 	return true;
 }
 
-
 /**
- *
  * Processes event permissions from the role configuration array. Triggered by the 'ready', 'system' event.
  * This is to make sure that all plugins' init functions have been executed, and all event handlers have already been initialized
  *
- * @param string $event Equals 'ready'
- * @param string $event_type Equals 'system'
- * @param mixed $object Not in use for this specific listener
+ * @param string $event      "ready"
+ * @param string $event_type "system"
+ * @param mixed  $object     Not in use for this specific listener
  * @return boolean
  */
-function roles_events_permissions($event, $type, $object) {
+function roles_events_permissions($event, $event_type, $object) {
 
 	$role = roles_get_role();
 	if (elgg_instanceof($role, 'object', 'role')) {
@@ -395,13 +379,13 @@ function roles_events_permissions($event, $type, $object) {
 }
 
 /**
- *
  * Saves user role upon changing role on the user settings page
  *
- * @param string $hook_name Equals "usersettings:save"
- * @param string $entity_type Equals "user"
- * @param mixed $return_value
- * @param mixed $params An associative array of parameters provided by the hook trigger
+ * @param string $hook_name    "usersettings:save"
+ * @param string $entity_type  "user"
+ * @param mixed  $return_value Return value
+ * @param mixed  $params       An associative array of parameters provided by the hook trigger
+ * @return void
  */
 function roles_user_settings_save($hook_name, $entity_type, $return_value, $params) {
 	$role_name = get_input('role');
@@ -424,13 +408,20 @@ function roles_user_settings_save($hook_name, $entity_type, $return_value, $para
 	return null;
 }
 
-
+/**
+ * Assigns user role when user is created
+ *
+ * @param string   $event "create"
+ * @param string   $type  "user"
+ * @param ElggUser $user  User entity
+ * @return void
+ */
 function roles_create_user($event, $type, $user) {
 	$rolename = get_input('role', false);
 	if (elgg_is_admin_logged_in() && $rolename) {
 		// admin is adding a user, give them the role they asked for
 		$role = roles_get_role_by_name($rolename);
-		
+
 		if ($role) {
 			roles_set_role($role, $user);
 		}
