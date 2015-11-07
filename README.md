@@ -1,5 +1,8 @@
 Roles for Elgg
 ==============
+![Elgg 1.11](https://img.shields.io/badge/Elgg-1.11.x-orange.svg?style=flat-square)
+![Elgg 1.12](https://img.shields.io/badge/Elgg-1.12.x-orange.svg?style=flat-square)
+![Elgg 2.0](https://img.shields.io/badge/Elgg-2.0.x-orange.svg?style=flat-square)
 
 This project implements user roles for Elgg, providing more granular control over the site than Elgg's default user distinction.
 
@@ -9,6 +12,17 @@ By using this plugin, you can easily introduce custom roles, restricting groups 
 
 Please understand that the Roles plugin, in its current state, **is rather a framework than a full stand-alone plugin.**
 You'll need to make additional tweaks, or use extension plugins, to make the custom roles work.
+
+
+## Installation
+
+```sh
+# from project root
+composer require -g composer/installers
+composer require arckinteractive/roles:~2.0
+# run tests
+phpunit
+```
 
 ## Introduction
 
@@ -190,6 +204,27 @@ function myroles_config($hook_name, $entity_type, $return_value, $params) {
 		return array_merge($return_value, $roles);
 	}
 }
+```
+
+For simple rules, such as `allow` and `deny`, you can use short syntax:
+
+```php
+$permissions['actions'] = array(
+		'groups/save' => 'deny',
+		'blogs/save' => 'allow',
+	),
+);
+```
+
+Pages and actions paths can be set using simple regex patterns:
+
+```php
+$permissions['pages'] = array(
+		'groups/(view|edit)' => 'deny',
+		'blogs/owner/\d+' => 'allow',
+		'admin/.*' => 'deny',
+	),
+);
 ```
 
 The above code adds a new role to the system identified as `limited_users`. Members of this role
@@ -403,10 +438,11 @@ When you `deny` a hook, the roles plugin will basically unregister the given hoo
 handlers for the specified hook.
 
 ```php
-	$permissions['hooks'] = array(
-		'usersettings:save::user' => array(
-			'rule' => 'deny',
-			'hook' => array(
+$permissions['hooks'] = array(
+    'register::menu:extras' => 'deny',
+	'usersettings:save::user' => array(
+		'rule' => 'deny',
+		'hook' => array(
 			'handler' => 'user_settings_save',
 		)
 	),
@@ -558,3 +594,13 @@ extension plugin:
  *  In your manifest file, use the `<requires>` tag to indicate that your plugin is dependent on the roles plugin.
  *  In your role configuration hook, use graceful role definition: instead of just returning the new role definition array, merge it with the previously existing array.
  *  Keep security in mind. It's usually not enough just to remove an item from a given menu – you'll want to deny access to corresponding pages and actions as well.
+
+
+## Upgrading
+
+### From 1.x
+
+ * Cache is no longer written to the global `$PERMISSIONS_CACHE`. It is not a private property of the `\Elgg\Roles\Api` class
+ * `extends` and `permissions` metadata of the `ElggRole` object can no longer be access directly. Use `ElggRole::setExtends()`, `ElggRole::getExtends()`, `ElggRole:setPermissions()` and `ElggRole::getPermissions()`
+ * `title` attribute of the `ElggRole` object is now stored as a raw string. Use `ElggRole::getDisplayName()` to display an i18n title
+ * All menu items that link to denied pages and actions will now be removed automatically. Unregister the `roles_menus_cleanup` handler to revert to old behavior.
