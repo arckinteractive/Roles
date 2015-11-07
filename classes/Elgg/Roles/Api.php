@@ -13,6 +13,11 @@ class Api {
 	const VISITOR_ROLE = 'visitor';
 	const NO_ROLE = '_no_role_';
 
+	const DENY = 'deny';
+	const ALLOW = 'allow';
+	const REPLACE = 'replace';
+	const EXTEND = 'extend';
+	
 	/**
 	 * @var DbInterface
 	 */
@@ -555,6 +560,52 @@ class Api {
 	 */
 	public function isReservedRoleName($role_name) {
 		return in_array($role_name, $this->getReservedRoleNames());
+	}
+
+	/**
+	 * Setup views for a given role
+	 * 
+	 * @param ElggRole $role Role
+	 * @return void
+	 */
+	public function setupViews(\ElggRole $role) {
+
+		$role_perms = $this->getPermissions($role, 'views');
+		foreach ($role_perms as $view => $perm_details) {
+			switch ($perm_details['rule']) {
+
+				case self::DENY:
+					elgg_register_plugin_hook_handler('view', $view, array($this, 'supressView'));
+					break;
+
+				case self::EXTEND:
+					$params = $perm_details['view_extension'];
+					$view_extension = $this->replaceDynamicPaths($params['view']);
+					$priority = isset($params['priority']) ? $params['priority'] : 501;
+					$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+					elgg_extend_view($view, $view_extension, $priority, $viewtype);
+					break;
+
+				case self::REPLACE:
+					$params = $perm_details['view_replacement'];
+					$location = elgg_get_root_path() . $this->replaceDynamicPaths($params['location']);
+					$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
+					elgg_set_view_location($view, $location, $viewtype);
+					break;
+				
+				case self::ALLOW:
+					elgg_unregister_plugin_hook_handler('view', $view, array($this, 'supressView'));
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Supresses view output
+	 * @return string
+	 */
+	public function supressView() {
+		return '';
 	}
 
 }

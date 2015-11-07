@@ -39,6 +39,53 @@ class DbMock implements DbInterface {
 				),
 			),
 		),
+		'deny' => array(
+			'title' => 'deny',
+			'extends' => array(),
+			'permissions' => array(
+				'views' => array(
+					'foo/bar' => 'deny',
+				)
+			)
+		),
+		'allow' => array(
+			'title' => 'deny',
+			'extends' => array('deny'),
+			'permissions' => array(
+				'views' => array(
+					'foo/bar' => 'allow',
+				)
+			)
+		),
+		'extend' => array(
+			'title' => 'extend',
+			'extends' => array('deny'),
+			'permissions' => array(
+				'views' => array(
+					'foo/bar' => array(
+						'rule' => 'extend',
+						'view_extension' => array(
+							'view' => 'foo/baz',
+							'priority' => 400,
+						),
+					),
+				)
+			)
+		),
+		'replace' => array(
+			'title' => 'replace',
+			'extends' => array('deny'),
+			'permissions' => array(
+				'views' => array(
+					'foo/baz' => array(
+						'rule' => 'replace',
+						'view_replacement' => array(
+							'location' => '/mod/roles/tests/phpunit/test_files/views2/',
+						),
+					),
+				)
+			)
+		),
 	);
 
 	public function getAllRoles() {

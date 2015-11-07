@@ -118,4 +118,30 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		elgg_pop_context();
 		elgg_pop_context();
 	}
+
+	public function testDenyView() {
+		$role = $this->api->getRoleByName('deny');
+		$this->api->setupViews($role);
+		$this->assertEquals('', elgg_view('foo/bar'));
+	}
+
+	public function testAllowView() {
+		$role = $this->api->getRoleByName('allow');
+		$this->api->setupViews($role);
+		$this->assertEquals('bar', elgg_view('foo/bar'));
+	}
+
+	public function testExtendView() {
+		$role = $this->api->getRoleByName('extend');
+		$this->api->setupViews($role);
+		$this->assertEquals('bazbar', elgg_view('foo/bar'));
+	}
+
+	public function testReplaceView() {
+		$role = $this->api->getRoleByName('replace');
+		$this->api->setupViews($role);
+		$this->assertEquals('baz2', elgg_view('foo/baz'));
+	}
+
+	
 }

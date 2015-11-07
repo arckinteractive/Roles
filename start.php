@@ -80,32 +80,7 @@ function roles_register_views($event, $event_type, $object) {
 	if (!$role instanceof \ElggRole) {
 		return;
 	}
-
-	$role_perms = roles_get_role_permissions($role, 'views');
-
-	foreach ($role_perms as $view => $perm_details) {
-		switch ($perm_details['rule']) {
-			case 'deny':
-				elgg_register_plugin_hook_handler('view', $view, 'roles_views_permissions');
-				break;
-			case 'extend':
-				$params = $perm_details['view_extension'];
-				$view_extension = roles_replace_dynamic_paths($params['view']);
-				$priority = isset($params['priority']) ? $params['priority'] : 501;
-				$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
-				elgg_extend_view($view, $view_extension, $priority, $viewtype);
-				break;
-			case 'replace':
-				$params = $perm_details['view_replacement'];
-				$location = elgg_get_root_path() . roles_replace_dynamic_paths($params['location']);
-				$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
-				elgg_set_view_location($view, $location, $viewtype);
-				break;
-			case 'allow':
-			default:
-				break;
-		}
-	}
+	return roles()->setupViews($role);
 }
 
 /**
@@ -117,20 +92,10 @@ function roles_register_views($event, $event_type, $object) {
  * @param mixed  $return_value The original view output
  * @param mixed  $params       An associative array of parameters provided by the hook trigger
  * @return string An empty string to suppress the output of the original view
+ * @deprecated 2.0
  */
 function roles_views_permissions($hook_name, $type, $return_value, $params) {
-
-	$role = roles_get_role();
-	if (!$role instanceof \ElggRole) {
-		return;
-	}
-
-	$role_perms = roles_get_role_permissions($role, 'views');
-	foreach ($role_perms as $view => $perm_details) {
-		if ($params['view'] == $view) {
-			return ''; // Supress view output
-		}
-	}
+	return roles()->supressView();
 }
 
 /**
