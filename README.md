@@ -4,9 +4,9 @@ Roles for Elgg
 ![Elgg 1.12](https://img.shields.io/badge/Elgg-1.12.x-orange.svg?style=flat-square)
 ![Elgg 2.0](https://img.shields.io/badge/Elgg-2.0.x-orange.svg?style=flat-square)
 
-[![Build Status](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/badges/build.png?b=master)](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/build-status/master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/hypeJunction/Elgg-roles/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/arckinteractive/roles/badges/build.png?b=master)](https://scrutinizer-ci.com/g/arckinteractive/roles/build-status/master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/arckinteractive/roles/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/arckinteractive/roles/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/arckinteractive/roles/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/arckinteractive/roles/?branch=master)
 
 This project implements user roles for Elgg, providing more granular control over the site than Elgg's default user distinction.
 
