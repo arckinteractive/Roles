@@ -12,6 +12,12 @@ matrix:
   include:
     - php: 5.5
       env: VARIA=true
+      before_script:
+        - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+        - git checkout 2.0
+        - git clone https://github.com/$TRAVIS_REPO_SLUG.git mod/roles
+        - cd mod/roles
+        - git checkout -qf $TRAVIS_COMMIT
       install:
        - phpenv rehash
        - composer install
