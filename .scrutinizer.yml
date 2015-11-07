@@ -23,6 +23,10 @@ tools:
     php_code_sniffer:
         config:
             ruleset: ../elgg-coding-standards/elgg.xml
+    external_code_coverage: true
+    php_code_coverage: true
+    php_pdepend: true
+    
 checks:
     php:
         code_rating: true
