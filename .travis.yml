@@ -12,20 +12,31 @@ matrix:
   include:
     - php: 5.5
       env: VARIA=true
-      before_script:
+      install:
+        - phpenv rehash
         - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
         - git checkout 2.0
+        - composer install
         - git clone https://github.com/$TRAVIS_REPO_SLUG.git mod/roles
         - cd mod/roles
         - git checkout -qf $TRAVIS_COMMIT
-      install:
-       - phpenv rehash
-       - composer install
-       - wget https://scrutinizer-ci.com/ocular.phar
+        - composer install
+        - wget https://scrutinizer-ci.com/ocular.phar
+
       script:
        - phpunit --coverage-clover=coverage.clover
+
       after_script:
        - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+install:
+ - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+ - git checkout 2.0
+ - composer install
+ - git clone https://github.com/$TRAVIS_REPO_SLUG.git mod/roles
+ - cd mod/roles
+ - git checkout -qf $TRAVIS_COMMIT
+ - composer install
 
 script:
  - phpunit
