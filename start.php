@@ -1,7 +1,6 @@
 <?php
 
 /**
- *
  * Roles plugin
  *
  * @package Roles
