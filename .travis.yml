@@ -1,0 +1,47 @@
+language: php
+php:
+ - 5.3
+ - 5.4
+ - 5.5
+
+branches:
+  - master
+
+matrix:
+  include:
+    - php: 5.3
+      env: VARIA=true
+      before_script:
+       - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+       - git checkout 2.0
+       - mv ../roles mod/roles
+       - node -v
+       - pear install pear/PHP_CodeSniffer
+       - mkdir ../elgg-coding-standards
+       - git clone https://github.com/Elgg/elgg-coding-standards.git ../elgg-coding-standards/
+       - phpenv rehash
+       - curl -sS https://getcomposer.org/installer | php
+      script:
+       - phpcs --standard=../elgg-coding-standards/elgg.xml --warning-severity=0 --ignore=*../Elgg/mod/roles/tests/*,*./Elgg/mod/roles/vendors/* ../Elgg/mod/roles/
+       - phpunit --coverage-clover=coverage.clover
+       - php composer.phar validate --verbose ../Elgg/mod/roles/composer.json
+
+services:
+ - mysql
+
+before_script:
+ - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+ - git checkout 2.0
+ - mv ../roles mod/roles
+ - mysql -e 'create database elgg;'
+ - echo "USE mysql; UPDATE user SET password=PASSWORD('password') WHERE user='root'; FLUSH PRIVILEGES;" | mysql -u root
+ - mkdir "${HOME}/elgg_data/"
+ - php -f ../Elgg/install/cli/travis_installer.php
+ - php -f ../Elgg/mod/roles/.travis/activate.php
+
+script:
+ - phpunit
+ - php -f ../Elgg/engine/tests/suite.php
+
+notifications:
+  email: false

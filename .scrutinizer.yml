@@ -1,0 +1,29 @@
+filter:
+    excluded_paths:
+        - 'vendors/*'
+        - '*/vendors/*'
+        - '*/tests/*'
+        - '*/vendor/*'
+before_commands:
+        - git clone https://github.com/Elgg/elgg-coding-standards.git ../elgg-coding-standards/
+tools:
+    js_hint:
+        filter:
+            excluded_paths: ['vendors/*','*/vendors/*','*/tests/*','*/vendor/*']
+    php_mess_detector:
+        filter:
+            excluded_paths: ['vendors/*','*/vendors/*','*/tests/*','*/vendor/*']
+    sensiolabs_security_checker: true
+    php_pdepend:
+        excluded_dirs:
+            - vendors
+            - vendor
+    php_hhvm: true
+    php_sim: true
+    php_code_sniffer:
+        config:
+            ruleset: ../elgg-coding-standards/elgg.xml
+checks:
+    php:
+        code_rating: true
+        duplication: true
