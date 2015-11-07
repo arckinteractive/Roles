@@ -1,19 +1,22 @@
 language: php
 
 php:
- - 5.4
  - 5.5
  - 5.6
+ - 5.7
+
+sudo: false
 
 branches:
     - master
 
 matrix:
   include:
-    - php: 5.5
+    - php: 5.6
       env: VARIA=true
       install:
         - phpenv rehash
+        - composer self-update
         - composer global require fxp/composer-asset-plugin
         - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
         - git checkout 2.0
@@ -31,6 +34,7 @@ matrix:
        - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
 install:
+ - composer self-update
  - composer global require fxp/composer-asset-plugin
  - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
  - git checkout 2.0
