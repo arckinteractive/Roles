@@ -1,0 +1,47 @@
+language: php
+
+php:
+ - 5.5
+ - 5.6
+
+sudo: false
+
+branches:
+    - master
+
+matrix:
+  include:
+    - php: 5.6
+      env: VARIA=true
+      install:
+        - phpenv rehash
+        - composer self-update
+        - composer global require fxp/composer-asset-plugin
+        - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+        - git checkout 2.0
+        - composer install
+        - git clone https://github.com/$TRAVIS_REPO_SLUG.git mod/roles
+        - cd mod/roles
+        - git checkout -qf $TRAVIS_COMMIT
+        - composer install
+        - wget https://scrutinizer-ci.com/ocular.phar
+
+      script:
+       - phpunit --coverage-clover=coverage.clover
+
+      after_script:
+       - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+install:
+ - composer self-update
+ - composer global require fxp/composer-asset-plugin
+ - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
+ - git checkout 2.0
+ - composer install
+ - git clone https://github.com/$TRAVIS_REPO_SLUG.git mod/roles
+ - cd mod/roles
+ - git checkout -qf $TRAVIS_COMMIT
+ - composer install
+
+script:
+ - phpunit

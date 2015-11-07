@@ -1,0 +1,12 @@
+#Ignore files that will need to be changed locally
+.DS_Store
+.htaccess
+robots.txt
+/nbproject/
+/.sass-cache/
+/node_modules/
+/build/
+/releases/
+/vendor/
+composer.lock
+Gemfile.lock
