@@ -427,10 +427,11 @@ When you `deny` a hook, the roles plugin will basically unregister the given hoo
 handlers for the specified hook.
 
 ```php
-	$permissions['hooks'] = array(
-		'usersettings:save::user' => array(
-			'rule' => 'deny',
-			'hook' => array(
+$permissions['hooks'] = array(
+    'register::menu:extras' => 'deny',
+	'usersettings:save::user' => array(
+		'rule' => 'deny',
+		'hook' => array(
 			'handler' => 'user_settings_save',
 		)
 	),

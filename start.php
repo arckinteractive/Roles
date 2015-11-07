@@ -44,19 +44,18 @@ function roles_init() {
 	// Due to dynamically created (or extended) menus, we need to catch all 'register' hooks _after_ other modules added/removed their menu items
 	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999);
 
-	// Set up roles based hooks and event listener, after all plugin is initialized
-	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions');
-	elgg_register_event_handler('ready', 'system', 'roles_events_permissions');
-	elgg_register_event_handler('create', 'user', 'roles_create_user');
-
 	// Check for role configuration updates
 	if (elgg_is_admin_logged_in()) { // @TODO think through if this should rather be a role-based permission
 		run_function_once('roles_update_100_to_101');
-		elgg_register_event_handler('ready', 'system', 'roles_check_update');
+		elgg_register_event_handler('ready', 'system', 'roles_check_update', 1);
 	}
+	
+	// Set up role-specific views, hooks and events, after all plugins are initialized
+	elgg_register_event_handler('ready', 'system', 'roles_hooks_permissions', 9999);
+	elgg_register_event_handler('ready', 'system', 'roles_events_permissions', 9999);
+	elgg_register_event_handler('ready', 'system', 'roles_register_views', 9999);
 
-	// Set up roles based view management
-	elgg_register_event_handler('ready', 'system', 'roles_register_views');
+	elgg_register_event_handler('create', 'user', 'roles_create_user');
 }
 
 /**
@@ -187,22 +186,21 @@ function roles_menus_permissions($hook_name, $type, $return_value, $params) {
 /**
  * Processes page permissions from the role configuration array. This is called upon each "route" triggered hook.
  *
- * @param string $hook_name    "route"
- * @param string $type         The triggered "register" hook's type
- * @param mixed  $return_value Return value
- * @param mixed  $params       An associative array of parameters provided by the hook trigger
+ * @param string $hook   "route"
+ * @param string $type   The triggered "register" hook's type
+ * @param array  $route  'identifier' and 'segments'
  * @return void
  */
-function roles_pages_permissions($hook_name, $type, $return_value, $params) {
+function roles_pages_permissions($hook, $type, $route) {
 	$role = roles_get_role();
 	if (!$role instanceof ElggRole) {
 		return;
 	}
 
-	$segments = (array) elgg_extract('segments', $return_value, array());
-	$identifier = elgg_extract('identifier', $return_value, elgg_extract('handler', $return_value));
-
+	$segments = (array) elgg_extract('segments', $route, array());
+	$identifier = elgg_extract('identifier', $route, elgg_extract('handler', $route));
 	array_unshift($segments, $identifier);
+
 	$result = roles()->pageGatekeeper($role, implode('/', $identifier));
 
 	$error = elgg_extract('error', $result);
@@ -217,124 +215,29 @@ function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 }
 
 /**
- * Processes hook permissions from the role configuration array. Triggered by the 'ready', 'system' event.
+ * Processes hook permissions from the role configuration array. Triggered by the 'ready','system' event.
  * This is to make sure that all plugins' init functions have been executed, and all hook handlers have already been initialized
- *
- * @param string $event      "ready"
- * @param string $event_type "system"
- * @param mixed  $object     Not in use for this specific listener
- * @return boolean
+ * @return void
  */
-function roles_hooks_permissions($event, $event_type, $object) {
-
+function roles_hooks_permissions() {
 	$role = roles_get_role();
 	if (!$role instanceof ElggRole) {
 		return;
 	}
-
-	$role_perms = roles_get_role_permissions($role, 'hooks');
-	foreach ($role_perms as $hook => $perm_details) {
-		list($hook_name, $type) = explode('::', $hook);
-		if (!$type) {
-			$type = 'all';
-		}
-		switch ($perm_details['rule']) {
-			case 'deny':
-				$params = $perm_details['hook'];
-				if (is_array($params)) {
-					$handler = $params['handler'];
-					elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
-				} else {
-					if (is_callable('elgg_clear_plugin_hook_handlers')) {
-						elgg_clear_plugin_hook_handlers($hook_name, $type);
-					} else {
-						$handlers = _elgg_services()->hooks->getOrderedHandlers($hook_name, $type);
-						foreach ($handlers as $handler) {
-							elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
-						}
-					}
-				}
-				break;
-			case 'extend':
-				$params = $perm_details['hook'];
-				$handler = $params['handler'];
-				$priority = isset($params['priority']) ? $params['priority'] : 500;
-				elgg_register_plugin_hook_handler($hook_name, $type, $handler, $priority);
-				break;
-			case
-
-			'replace': $params = $perm_details['hook'];
-				$old_handler = $params['old_handler'];
-				$new_handler = $params['new_handler'];
-				$priority = isset($params['priority']) ? $params['priority'] : 500;
-				elgg_unregister_plugin_hook_handler($hook_name, $type, $old_handler);
-				elgg_register_plugin_hook_handler($hook_name, $type, $new_handler, $priority);
-				break;
-			case 'allow':
-			default:
-				break;
-		}
-	}
-
-	return true;
+	return roles()->setupHooks($role);
 }
 
 /**
- * Processes event permissions from the role configuration array. Triggered by the 'ready', 'system' event.
+ * Processes event permissions from the role configuration array. Triggered by the 'ready','system' event.
  * This is to make sure that all plugins' init functions have been executed, and all event handlers have already been initialized
- *
- * @param string $event      "ready"
- * @param string $event_type "system"
- * @param mixed  $object     Not in use for this specific listener
- * @return boolean
+ * @return void
  */
-function roles_events_permissions($event, $event_type, $object) {
-
+function roles_events_permissions() {
 	$role = roles_get_role();
 	if (!$role instanceof ElggRole) {
 		return;
 	}
-
-	$role_perms = roles_get_role_permissions($role, 'events');
-	foreach ($role_perms as $event => $perm_details) {
-		list($event_name, $type) = explode('::', $event);
-		if (!$type) {
-			$type = 'all';
-		}
-		switch ($perm_details['rule']) {
-			case 'deny':
-				$params = $perm_details['event'];
-				if (is_array($params)) {
-					$handler = $params['handler'];
-					elgg_unregister_event_handler($event_name, $type, $handler);
-				} else {
-					// @TODO: Update when https://github.com/Elgg/Elgg/issues/9113 is fixed
-					$handlers = _elgg_services()->events->getOrderedHandlers($event_name, $type);
-					foreach ($handlers as $handler) {
-						elgg_unregister_event_handler($event_name, $type, $handler);
-					}
-				}
-				break;
-			case 'extend':
-				$params = $perm_details['event'];
-				$handler = $params['handler'];
-				$priority = isset($params['priority']) ? $params['priority'] : 500;
-				elgg_register_event_handler($event_name, $type, $handler, $priority);
-				break;
-			case 'replace':
-				$params = $perm_details['hook'];
-				$old_handler = $params['old_handler'];
-				$new_handler = $params['new_handler'];
-				$priority = isset($params['priority']) ? $params['priority'] : 500;
-				elgg_unregister_event_handler($event_name, $type, $old_handler);
-				elgg_register_event_handler($event_name, $type, $new_handler, $priority);
-				break;
-			case 'allow':
-			default:
-				break;
-		}
-	}
-	return true;
+	return roles()->setupEvents($role);
 }
 
 /**

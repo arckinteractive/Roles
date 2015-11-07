@@ -171,4 +171,93 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(['forward' => 'foo/baz', 'error' => false], $this->api->pageGatekeeper($role, 'foo/bar'));
 		$this->assertEquals(['forward' => false, 'error' => false], $this->api->pageGatekeeper($role, 'foo/baz'));
 	}
+
+	public function testDenyHook() {
+
+		elgg_register_plugin_hook_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('deny');
+		$this->api->setupHooks($role);
+
+		$expected = false;
+		$actual = elgg_trigger_plugin_hook('foo', 'bar', null, $expected);
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testAllowHook() {
+
+		elgg_register_plugin_hook_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('allow');
+		$this->api->setupHooks($role);
+
+		$expected = true;
+		$actual = elgg_trigger_plugin_hook('foo', 'bar', null, null);
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testExtendHook() {
+
+		elgg_register_plugin_hook_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('extend');
+		$this->api->setupHooks($role);
+
+		$expected = false;
+		$actual = elgg_trigger_plugin_hook('foo', 'bar', null, null);
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testReplaceHook() {
+
+		elgg_register_plugin_hook_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('replace');
+		$this->api->setupHooks($role);
+
+		$expected = false;
+		$actual = elgg_trigger_plugin_hook('foo', 'bar', null, null);
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testDenyEvent() {
+
+		elgg_register_event_handler('foo', 'bar', '\Elgg\Values::getFalse');
+		$role = $this->api->getRoleByName('deny');
+		$this->api->setupEvents($role);
+
+		$expected = true;
+		$actual = elgg_trigger_event('foo', 'bar');
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testAllowEvent() {
+
+		elgg_register_event_handler('foo', 'bar', '\Elgg\Values::getFalse');
+		$role = $this->api->getRoleByName('allow');
+		$this->api->setupEvents($role);
+
+		$expected = false;
+		$actual = elgg_trigger_event('foo', 'bar');
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testExtendEvent() {
+
+		elgg_register_event_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('extend');
+		$this->api->setupEvents($role);
+
+		$expected = false;
+		$actual = elgg_trigger_event('foo', 'bar');
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testReplaceEvent() {
+
+		elgg_register_event_handler('foo', 'bar', '\Elgg\Values::getTrue');
+		$role = $this->api->getRoleByName('replace');
+		$this->api->setupEvents($role);
+
+		$expected = false;
+		$actual = elgg_trigger_event('foo', 'bar');
+		$this->assertEquals($expected, $actual);
+	}
+
 }

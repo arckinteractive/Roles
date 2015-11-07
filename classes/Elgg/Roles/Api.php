@@ -610,7 +610,116 @@ class Api {
 	}
 
 	/**
-	 * Setup action permissions
+	 * Setup hooks for a given role
+	 * 
+	 * @param ElggRole $role Role object
+	 * @return void
+	 */
+	public function setupHooks(\ElggRole $role) {
+		$role_perms = $this->getPermissions($role, 'hooks');
+		foreach ($role_perms as $hook => $perm_details) {
+			list($hook_name, $type) = explode('::', $hook);
+			if (!$type) {
+				$type = 'all';
+			}
+			switch ($perm_details['rule']) {
+				case self::DENY:
+					$params = elgg_extract('hook', $perm_details);
+					if (isset($params['handler'])) {
+						$handler = $params['handler'];
+						elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
+					} else {
+						if (is_callable('elgg_clear_plugin_hook_handlers')) {
+							elgg_clear_plugin_hook_handlers($hook_name, $type);
+						} else {
+							$handlers = _elgg_services()->hooks->getOrderedHandlers($hook_name, $type);
+							foreach ($handlers as $handler) {
+								elgg_unregister_plugin_hook_handler($hook_name, $type, $handler);
+							}
+						}
+					}
+					break;
+
+				case self::EXTEND:
+					$params = $perm_details['hook'];
+					$handler = $params['handler'];
+					$priority = isset($params['priority']) ? $params['priority'] : 500;
+					elgg_register_plugin_hook_handler($hook_name, $type, $handler, $priority);
+					break;
+
+				case self::REPLACE:
+					$params = $perm_details['hook'];
+					$old_handler = $params['old_handler'];
+					$new_handler = $params['new_handler'];
+					$priority = isset($params['priority']) ? $params['priority'] : 500;
+					elgg_unregister_plugin_hook_handler($hook_name, $type, $old_handler);
+					elgg_register_plugin_hook_handler($hook_name, $type, $new_handler, $priority);
+					break;
+
+				case self::ALLOW:
+				default:
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Setup events for a given role
+	 * 
+	 * @param ElggRole $role Role object
+	 * @return void
+	 */
+	function setupEvents(\ElggRole $role) {
+		
+		$role_perms = $this->getPermissions($role, 'events');
+		foreach ($role_perms as $event => $perm_details) {
+
+			list($event_name, $type) = explode('::', $event);
+			if (!$type) {
+				$type = 'all';
+			}
+
+			switch ($perm_details['rule']) {
+				
+				case self::DENY:
+					$params = elgg_extract('event', $perm_details);
+					if (isset($params['handler'])) {
+						$handler = $params['handler'];
+						elgg_unregister_event_handler($event_name, $type, $handler);
+					} else {
+						// @TODO: Update when https://github.com/Elgg/Elgg/issues/9113 is fixed
+						$handlers = _elgg_services()->events->getOrderedHandlers($event_name, $type);
+						foreach ($handlers as $handler) {
+							elgg_unregister_event_handler($event_name, $type, $handler);
+						}
+					}
+					break;
+
+				case self::EXTEND:
+					$params = elgg_extract('event', $perm_details);
+					$handler = $params['handler'];
+					$priority = isset($params['priority']) ? $params['priority'] : 500;
+					elgg_register_event_handler($event_name, $type, $handler, $priority);
+					break;
+
+				case self::REPLACE:
+					$params = elgg_extract('event', $perm_details);
+					$old_handler = $params['old_handler'];
+					$new_handler = $params['new_handler'];
+					$priority = isset($params['priority']) ? $params['priority'] : 500;
+					elgg_unregister_event_handler($event_name, $type, $old_handler);
+					elgg_register_event_handler($event_name, $type, $new_handler, $priority);
+					break;
+
+				case self::ALLOW:
+				default:
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Check action access permissions for a given role
 	 * 
 	 * @param ElggRole $role   Role object
 	 * @param string   $action Registered action name
@@ -630,7 +739,7 @@ class Api {
 	}
 
 	/**
-	 * Apply page rules
+	 * Check page access permissions for a given role
 	 * 
 	 * @param ElggRole $role Role object
 	 * @param string   $path URL path
