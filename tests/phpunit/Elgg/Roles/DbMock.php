@@ -48,7 +48,10 @@ class DbMock implements DbInterface {
 				),
 				'actions' => array(
 					'foo/bar' => 'deny',
-				)
+				),
+				'pages' => array(
+					'foo/bar' => 'deny',
+				),
 			)
 		),
 		'allow' => array(
@@ -59,6 +62,9 @@ class DbMock implements DbInterface {
 					'foo/bar' => 'allow',
 				),
 				'actions' => array(
+					'foo/bar' => 'allow',
+				),
+				'pages' => array(
 					'foo/bar' => 'allow',
 				),
 			),
@@ -89,7 +95,13 @@ class DbMock implements DbInterface {
 							'location' => '/mod/roles/tests/phpunit/test_files/views2/',
 						),
 					),
-				)
+				),
+				'pages' => array(
+					'foo/bar' => array(
+						'rule' => 'redirect',
+						'forward' => 'foo/baz',
+					),
+				),
 			)
 		),
 	);

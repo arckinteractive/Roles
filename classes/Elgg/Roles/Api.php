@@ -16,6 +16,8 @@ class Api {
 	const ALLOW = 'allow';
 	const REPLACE = 'replace';
 	const EXTEND = 'extend';
+	const REDIRECT = 'redirect';
+	const FORWARD = 'forward';
 
 	/**
 	 * @var DbInterface
@@ -623,9 +625,45 @@ class Api {
 			switch ($perm_details['rule']) {
 				case self::DENY:
 					return false;
-
 			}
 		}
+	}
+
+	/**
+	 * Apply page rules
+	 * 
+	 * @param ElggRole $role Role object
+	 * @param string   $path URL path
+	 * @return array
+	 */
+	function pageGatekeeper(\ElggRole $role, $path = '') {
+		$forward = false;
+		$error = false;
+
+		$role_perms = $this->getPermissions($role, 'pages');
+		foreach ($role_perms as $page => $perm_details) {
+
+			if (!$this->matchPath($this->replaceDynamicPaths($page), $path)) {
+				continue;
+			}
+
+			switch ($perm_details['rule']) {
+
+				case self::DENY:
+					$error = true;
+
+				case self::REDIRECT:
+				case self::REPLACE:
+				case self::FORWARD:
+					$forward = elgg_extract('forward', $perm_details, REFERRER);
+					break;
+			}
+		}
+
+		return array(
+			'forward' => is_string($forward) ? $this->replaceDynamicPaths($forward) : $forward,
+			'error' => $error,
+		);
 	}
 
 }

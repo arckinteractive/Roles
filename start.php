@@ -198,34 +198,21 @@ function roles_pages_permissions($hook_name, $type, $return_value, $params) {
 	if (!$role instanceof ElggRole) {
 		return;
 	}
-	$role_perms = roles_get_role_permissions($role, 'pages');
-	$page_path = $return_value['handler'] . '/' . implode('/', $return_value['segments']);
 
-	foreach ($role_perms as $page => $perm_details) {
-		if (!roles_path_match(roles_replace_dynamic_paths($page), $page_path)) {
-			continue;
-		}
+	$segments = (array) elgg_extract('segments', $return_value, array());
+	$identifier = elgg_extract('identifier', $return_value, elgg_extract('handler', $return_value));
 
-		switch ($perm_details['rule']) {
-			case 'deny':
-				register_error(elgg_echo('roles:page:denied'));
-				if (isset($perm_details['forward'])) {
-					forward($perm_details['forward']);
-				} else {
-					forward(REFERER);
-				}
-				break;
-			case 'redirect':
-				if (isset($perm_details['forward'])) {
-					forward($perm_details['forward']);
-				} else {
-					forward(REFERER);
-				}
-				break;
-			case 'allow':
-			default:
-				break;
-		}
+	array_unshift($segments, $identifier);
+	$result = roles()->pageGatekeeper($role, implode('/', $identifier));
+
+	$error = elgg_extract('error', $result);
+	$forward = elgg_extract('forward', $result);
+
+	if ($error) {
+		register_error(elgg_echo('roles:page:denied'));
+	}
+	if ($forward) {
+		forward($forward);
 	}
 }
 

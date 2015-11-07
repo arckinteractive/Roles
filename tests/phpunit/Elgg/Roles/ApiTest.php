@@ -153,4 +153,22 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertNull($this->api->actionGatekeeper($role, 'foo/bar'));
 		$this->assertNull($this->api->actionGatekeeper($role, 'foo/baz'));
 	}
+
+	public function testDenyPage() {
+		$role = $this->api->getRoleByName('deny');
+		$this->assertEquals(['forward' => REFERRER, 'error' => true], $this->api->pageGatekeeper($role, 'foo/bar'));
+		$this->assertEquals(['forward' => false, 'error' => false], $this->api->pageGatekeeper($role, 'foo/baz'));
+	}
+
+	public function testAllowPage() {
+		$role = $this->api->getRoleByName('allow');
+		$this->assertEquals(['forward' => false, 'error' => false], $this->api->pageGatekeeper($role, 'foo/bar'));
+		$this->assertEquals(['forward' => false, 'error' => false], $this->api->pageGatekeeper($role, 'foo/baz'));
+	}
+
+	public function testRedirectPage() {
+		$role = $this->api->getRoleByName('replace');
+		$this->assertEquals(['forward' => 'foo/baz', 'error' => false], $this->api->pageGatekeeper($role, 'foo/bar'));
+		$this->assertEquals(['forward' => false, 'error' => false], $this->api->pageGatekeeper($role, 'foo/baz'));
+	}
 }
