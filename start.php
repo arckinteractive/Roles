@@ -102,32 +102,24 @@ function roles_views_permissions($hook_name, $type, $return_value, $params) {
  * Processes action permissions from the role configuration array. This is  called u pon each action execution.
  *
  * @param string  $hook_name    "action"
- * @param string  $type         The registered action name
+ * @param string  $action       The registered action name
  * @param boolean $return_value Return value
  * @param mixed   $params       An associative array of parameters provided by the hook trigger
  * @return boolean|void True if the action should be executed, false if it should be stopped
  */
-function roles_actions_permissions($hook_name, $type, $return_value, $params) {
+function roles_actions_permissions($hook_name, $action, $return_value, $params) {
 
 	$role = roles_get_role();
 	if (!$role instanceof \ElggRole) {
 		return;
 	}
 
-	$role_perms = roles_get_role_permissions($role, 'actions');
-	foreach ($role_perms as $action => $perm_details) {
-		if (!roles_path_match(roles_replace_dynamic_paths($action), $type)) {
-			continue;
-		}
-		switch ($perm_details['rule']) {
-			case 'deny':
-				register_error(elgg_echo('roles:action:denied'));
-				return false;
-			case 'allow':
-			default:
-				break;
-		}
+	$result = roles()->actionGatekeeper($role, $action);
+	if ($result === false) {
+		register_error(elgg_echo('roles:action:denied'));
 	}
+
+	return $result;
 }
 
 /**

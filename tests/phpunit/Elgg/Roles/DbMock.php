@@ -45,6 +45,9 @@ class DbMock implements DbInterface {
 			'permissions' => array(
 				'views' => array(
 					'foo/bar' => 'deny',
+				),
+				'actions' => array(
+					'foo/bar' => 'deny',
 				)
 			)
 		),
@@ -54,8 +57,11 @@ class DbMock implements DbInterface {
 			'permissions' => array(
 				'views' => array(
 					'foo/bar' => 'allow',
-				)
-			)
+				),
+				'actions' => array(
+					'foo/bar' => 'allow',
+				),
+			),
 		),
 		'extend' => array(
 			'title' => 'extend',

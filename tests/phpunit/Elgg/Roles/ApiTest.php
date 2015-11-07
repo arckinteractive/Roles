@@ -46,7 +46,7 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetRoleByName() {
 
-		$role =  $this->api->getRoleByName('default');
+		$role = $this->api->getRoleByName('default');
 		$this->assertInstanceOf('\ElggRole', $role);
 		$this->assertEquals('default', $role->name);
 
@@ -66,14 +66,13 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(Api::VISITOR_ROLE, $this->api->filterName(Api::NO_ROLE));
 		$this->assertEquals(Api::DEFAULT_ROLE, $this->api->filterName(Api::DEFAULT_ROLE));
 		$this->assertEquals('tester1', $this->api->filterName('tester1'));
-		
+
 		$user = new ElggUser();
 		$this->assertEquals(Api::DEFAULT_ROLE, $this->api->filterName(Api::NO_ROLE, $user));
 
 		$admin = new ElggUser();
 		$admin->admin = true;
 		$this->assertEquals(Api::ADMIN_ROLE, $this->api->filterName(Api::NO_ROLE, $admin));
-
 	}
 
 	public function testSetGetRole() {
@@ -143,5 +142,15 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('baz2', elgg_view('foo/baz'));
 	}
 
-	
+	public function testDenyAction() {
+		$role = $this->api->getRoleByName('deny');
+		$this->assertFalse($this->api->actionGatekeeper($role, 'foo/bar'));
+		$this->assertNull($this->api->actionGatekeeper($role, 'foo/baz'));
+	}
+
+	public function testAllowAction() {
+		$role = $this->api->getRoleByName('allow');
+		$this->assertNull($this->api->actionGatekeeper($role, 'foo/bar'));
+		$this->assertNull($this->api->actionGatekeeper($role, 'foo/baz'));
+	}
 }

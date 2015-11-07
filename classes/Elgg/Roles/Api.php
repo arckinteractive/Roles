@@ -12,12 +12,11 @@ class Api {
 	const ADMIN_ROLE = 'admin';
 	const VISITOR_ROLE = 'visitor';
 	const NO_ROLE = '_no_role_';
-
 	const DENY = 'deny';
 	const ALLOW = 'allow';
 	const REPLACE = 'replace';
 	const EXTEND = 'extend';
-	
+
 	/**
 	 * @var DbInterface
 	 */
@@ -592,7 +591,7 @@ class Api {
 					$viewtype = isset($params['viewtype']) ? $params['viewtype'] : '';
 					elgg_set_view_location($view, $location, $viewtype);
 					break;
-				
+
 				case self::ALLOW:
 					elgg_unregister_plugin_hook_handler('view', $view, array($this, 'supressView'));
 					break;
@@ -606,6 +605,27 @@ class Api {
 	 */
 	public function supressView() {
 		return '';
+	}
+
+	/**
+	 * Setup action permissions
+	 * 
+	 * @param ElggRole $role   Role object
+	 * @param string   $action Registered action name
+	 * @return boolean|void
+	 */
+	function actionGatekeeper(\ElggRole $role, $action = '') {
+		$role_perms = $this->getPermissions($role, 'actions');
+		foreach ($role_perms as $rule_name => $perm_details) {
+			if (!$this->matchPath($this->replaceDynamicPaths($rule_name), $action)) {
+				continue;
+			}
+			switch ($perm_details['rule']) {
+				case self::DENY:
+					return false;
+
+			}
+		}
 	}
 
 }
