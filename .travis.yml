@@ -14,6 +14,7 @@ matrix:
       env: VARIA=true
       install:
         - phpenv rehash
+        - composer global require fxp/composer-asset-plugin
         - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
         - git checkout 2.0
         - composer install
@@ -30,6 +31,7 @@ matrix:
        - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
 install:
+ - composer global require fxp/composer-asset-plugin
  - git clone https://github.com/Elgg/Elgg.git ../Elgg && cd ../Elgg
  - git checkout 2.0
  - composer install
