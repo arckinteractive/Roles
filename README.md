@@ -216,6 +216,17 @@ $permissions['actions'] = array(
 );
 ```
 
+Pages and actions paths can be set using simple regex patterns:
+
+```php
+$permissions['pages'] = array(
+		'groups/(view|edit)' => 'deny',
+		'blogs/owner/\d+' => 'allow',
+		'admin/.*' => 'deny',
+	),
+);
+```
+
 The above code adds a new role to the system identified as `limited_users`. Members of this role
 will not be able to create groups, as defined by the permission section of the configuration array.
 Permissions will be explained in more detail later.

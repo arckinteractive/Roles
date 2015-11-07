@@ -366,11 +366,13 @@ class Api {
 			// The rule contains regular expression; use regexp matching for the current path
 			$pattern = preg_replace('/^regexp\(/', '', $rule);
 			$pattern = preg_replace('/\)$/', '', $pattern);
-			return preg_match($pattern, $path);
 		} else {
-			// The rule contains a simple string; default string comparision will be used
-			return elgg_normalize_url($rule) == elgg_normalize_url($path);
+			$rule = trim($rule, '/');
+			$wwwroot = elgg_get_config('wwwroot') ? : elgg_get_site_url();
+			$pattern = "`^{$wwwroot}$rule/*$`i";
+			$path = elgg_normalize_url($path);
 		}
+		return (bool) preg_match($pattern, $path);
 	}
 
 	/**

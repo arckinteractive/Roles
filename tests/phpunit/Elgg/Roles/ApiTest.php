@@ -362,7 +362,27 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 				false,
 				'/blog/new/345',
 				'/blog/new/',
-			)
+			),
+			array(
+				true,
+				'regexp(/^admin\/((?!administer_utilities\/reportedcontent).)*$/)',
+				'admin/plugins',
+			),
+			array(
+				false,
+				'regexp(/^admin\/((?!administer_utilities\/reportedcontent).)*$/)',
+				'/admin/reportedcontent/123',
+			),
+			array(
+				true,
+				'/blog/owner/\d+/.*',
+				'/blog/owner/25/some-title',
+			),
+			array(
+				true,
+				'/blog/(view|edit)/\d+/.*',
+				'blog/edit/15/some-title',
+			),
 		);
 	}
 }
