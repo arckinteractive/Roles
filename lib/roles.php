@@ -139,67 +139,38 @@ function roles_check_update() {
 }
 
 /**
- *
- * Unregisters a menu item from the passed menu array. 
- * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
- *
- * @param array $menu The menu array
- * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be removed
- * @return array The new menu array without the unregistered item
+ * @deprecated 2.0
  */
-function roles_unregister_menu_item($menu, $item_name) {
-	return roles()->unregisterMenuItem($menu, $item_name);
+function roles_unregister_menu_item() {
+	
 }
 
 /**
- * Replaces an existing menu item with a new one. 
- * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
- *
- * @param array $menu The menu array
- * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
- * @param ElggMenuItem $menu_obj The replacement menu item
- * 
- * @return ElggMenuItem[] The new menu array with the replaced item
+ * @deprecated 2.0
  */
-function roles_replace_menu_item($menu, $item_name, $menu_obj) {
-	return roles()->replaceMenuItem($menu, $item_name, $menu_obj);
+function roles_replace_menu_item() {
+
 }
 
 /**
- * Recurses into the menu tree and unregister the menu item with the given name
- *
- * @param ElggMenuItem[] $menu              Menu
- * @param string         $menu_item_name    Menu item to unregister
- * @param string         $current_menu_name Name of the menu
- * @return ElggMenuItem[]
+ * @deprecated 2.0
  */
-function roles_unregister_menu_item_recursive($menu, $menu_item_name, $current_menu_name) {
-	return roles()->unregisterMenuItemRecursive($menu, $menu_item_name, $current_menu_name);
+function roles_unregister_menu_item_recursive() {
+	
 }
 
 /**
- * Recurses into the menu tree and removes a menu item with the give name
- *
- * @param ElggMenuItem[] $updated_menu       Updated menu
- * @param ElggMenuItem[] $menu               Original menu
- * @param string         $prepared_menu_name
- * @param ElggMenuItem   $menu_obj           Menu item
- * @return type
+ * @deprecated 2.0
  */
-function roles_replace_menu_item_recursive($updated_menu, $menu, $prepared_menu_name, $menu_obj) {
-	return roles()->unregisterMenuItemRecursive($menu, $prepared_menu_name, $current_menu_name);
+function roles_replace_menu_item_recursive() {
+	
 }
 
 /**
- *
- * Finds the index of a menu item in the menu array
- *
- * @param string $menu      The menu array
- * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
- * @return int The index of the menu item in the menu array
+ * @deprecated 2.0
  */
-function roles_find_menu_index($menu, $item_name) {
-	return roles()->findMenuIndex($menu, $item_name);
+function roles_find_menu_index() {
+	
 }
 
 /**
@@ -213,13 +184,10 @@ function roles_prepare_menu_vars($vars) {
 }
 
 /**
- * Gets a menu by name
- *
- * @param string $menu_name The name of the menu
- * @return array The array of ElggMenuItem objects from the menu
+ * @deprecated 2.0
  */
 function roles_get_menu($menu_name) {
-	return roles()->getMenu($menu_name);
+	
 }
 
 /**
@@ -261,7 +229,7 @@ function roles_check_context($permission_details, $strict = false) {
  * @return bool
  */
 function roles_update_100_to_101() {
-	
+
 	// Remove all 'roles_hash' values from plugin settings
 	// This will force new storage of the configuration array hash
 	$dbprefix = elgg_get_config('dbprefix');

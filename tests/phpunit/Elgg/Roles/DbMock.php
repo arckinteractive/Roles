@@ -57,6 +57,10 @@ class DbMock implements DbInterface {
 				),
 				'events' => array(
 					'foo::bar' => 'deny',
+				),
+				'menus' => array(
+					'foo' => 'deny',
+					'bar::baz' => 'deny',
 				)
 			)
 		),
@@ -78,6 +82,10 @@ class DbMock implements DbInterface {
 				),
 				'events' => array(
 					'foo::bar' => 'allow',
+				),
+				'menus' => array(
+					'foo' => 'allow',
+					'bar::baz' => 'allow',
 				)
 			),
 		),
@@ -110,6 +118,16 @@ class DbMock implements DbInterface {
 							'handler' => '\Elgg\Values::getFalse',
 							'priority' => 600,
 						)
+					),
+				),
+				'menus' => array(
+					'foo' => array(
+						'rule' => 'extend',
+						'menu_item' => array(
+							'name' => 'baz2',
+							'href' => 'baz2',
+							'text' => 'baz2',
+						),
 					),
 				),
 			)
@@ -148,6 +166,16 @@ class DbMock implements DbInterface {
 							'old_handler' => '\Elgg\Values::getTrue',
 							'new_handler' => '\Elgg\Values::getFalse',
 						)
+					),
+				),
+				'menus' => array(
+					'bar::baz' => array(
+						'rule' => 'replace',
+						'menu_item' => array(
+							'name' => 'baz2',
+							'href' => 'baz2',
+							'text' => 'baz2',
+						),
 					),
 				),
 			)

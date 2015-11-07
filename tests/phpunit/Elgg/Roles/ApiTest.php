@@ -260,4 +260,56 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $actual);
 	}
 
+	public function testDenyMenu() {
+		$role = $this->api->getRoleByName('deny');
+
+		$menu = $this->getMenu();
+		$this->assertEmpty($this->api->setupMenu($role, 'foo', $menu));
+
+		$filtered_menu = $this->api->setupMenu($role, 'bar', $menu);
+		$this->assertNotContains($menu['parent'], $filtered_menu);
+		$this->assertNotContains($menu['child'], $filtered_menu);
+	}
+
+	public function testAllowMenu() {
+		$role = $this->api->getRoleByName('allow');
+		$menu = $this->getMenu();
+		$this->assertEquals($menu, $this->api->setupMenu($role, 'foo', $menu));
+		$this->assertEquals($menu, $this->api->setupMenu($role, 'bar', $menu));
+	}
+
+	public function testExtendMenu() {
+		$role = $this->api->getRoleByName('extend');
+		$menu = $this->getMenu();
+		$this->assertEquals(count($menu) + 1, count($this->api->setupMenu($role, 'foo', $menu)));
+	}
+
+	public function testReplaceMenu() {
+		$role = $this->api->getRoleByName('replace');
+
+		$menu = $this->getMenu();
+
+		$filtered_menu = $this->api->setupMenu($role, 'bar', $menu);
+		$this->assertEquals('baz2', $filtered_menu['parent']->getName());
+		$this->assertEquals('baz2', $filtered_menu['child']->getParentName());
+	}
+
+	public function getMenu() {
+
+		$menu = array();
+		$menu['parent'] = \ElggMenuItem::factory(array(
+					'name' => 'baz',
+					'href' => 'baz',
+					'text' => 'baz',
+		));
+		$menu['bad'] = 'bad';
+		$menu['child'] = \ElggMenuItem::factory(array(
+					'name' => 'baz:child',
+					'parent_name' => 'baz',
+					'href' => 'baz/child',
+					'text' => 'baz:child'
+		));
+		return $menu;
+	}
+
 }

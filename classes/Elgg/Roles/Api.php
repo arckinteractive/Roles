@@ -302,142 +302,6 @@ class Api {
 	}
 
 	/**
-	 *
-	 * Unregisters a menu item from the passed menu array.
-	 * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
-	 *
-	 * @param array $menu The menu array
-	 * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be removed
-	 * @return array The new menu array without the unregistered item
-	 */
-	public function unregisterMenuItem($menu, $item_name) {
-		$updated_menu = $menu;
-
-		if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
-			unset($updated_menu[$index]);
-		}
-
-		return $updated_menu;
-	}
-
-	/**
-	 * Replaces an existing menu item with a new one.
-	 * Safe to use with dynamically created menus (as response to the "prepare", "menu" hook).
-	 *
-	 * @param array $menu The menu array
-	 * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
-	 * @param ElggMenuItem $menu_obj The replacement menu item
-	 *
-	 * @return ElggMenuItem[] The new menu array with the replaced item
-	 */
-	public function replaceMenuItem($menu, $item_name, $menu_obj) {
-		$updated_menu = $menu;
-
-		if (false !== $index = roles_find_menu_index($updated_menu, $item_name)) {
-			$updated_menu[$index] = $menu_obj;
-		}
-
-		return $updated_menu;
-	}
-
-	/**
-	 * Recurses into the menu tree and unregister the menu item with the given name
-	 *
-	 * @param ElggMenuItem[] $menu              Menu
-	 * @param string         $menu_item_name    Menu item to unregister
-	 * @param string         $current_menu_name Name of the menu
-	 * @return ElggMenuItem[]
-	 */
-	public function unregisterMenuItemRecursive($menu, $menu_item_name, $current_menu_name) {
-		$updated_menu = $menu;
-
-		$menu_name_parts = explode('::', $menu_item_name);
-		if ((isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name) && (count($menu_name_parts) === 1)) {
-			return array();
-		}
-
-
-		if (is_array($updated_menu) && (isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name)) {
-
-			foreach ($updated_menu as $index => $menu_obj) {
-
-				if ((count($menu_name_parts) === 2) && ($menu_name_parts[1] === $menu_obj->getName())) {
-					unset($updated_menu[$index]);
-				} else {
-					$children = $menu_obj->getChildren();
-					if (is_array($children) && !empty($children)) {
-						// This is a menu item with children
-						$current_item_name = implode("::", array_slice($menu_name_parts, 1));
-						$menu_obj->setChildren(roles_unregister_menu_item_recursive($children, $current_item_name, $menu_obj->getName()));
-					}
-				}
-			}
-		}
-
-		return $updated_menu;
-	}
-
-	/**
-	 * Recurses into the menu tree and removes a menu item with the give name
-	 *
-	 * @param ElggMenuItem[] $updated_menu       Updated menu
-	 * @param ElggMenuItem[] $menu               Original menu
-	 * @param string         $prepared_menu_name
-	 * @param ElggMenuItem   $menu_obj           Menu item
-	 * @return type
-	 */
-	public function replaceMenuItemRecursive($updated_menu, $menu, $prepared_menu_name, $menu_obj) {
-		$updated_menu = $menu;
-
-		$menu_name_parts = explode('::', $menu_item_name);
-		if ((isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name) && (count($menu_name_parts) === 1)) {
-			return $menu_obj;
-		}
-
-
-		if (is_array($updated_menu) && (isset($menu_name_parts[0])) && ($menu_name_parts[0] === $current_menu_name)) {
-
-			foreach ($updated_menu as $index => $menu_obj) {
-
-				if ((count($menu_name_parts) === 2) && ($menu_name_parts[1] === $menu_obj->getName())) {
-					$updated_menu[$index] = $menu_obj;
-				} else {
-					$children = $menu_obj->getChildren();
-					if (is_array($children) && !empty($children)) {
-						// This is a menu item with children
-						$current_item_name = implode("::", array_slice($menu_name_parts, 1));
-						$menu_obj->setChildren(roles_replace_menu_item_recursive($children, $current_item_name, $menu_obj->getName(), $menu_obj));
-					}
-				}
-			}
-		}
-
-		return $updated_menu;
-	}
-
-	/**
-	 *
-	 * Finds the index of a menu item in the menu array
-	 *
-	 * @param string $menu      The menu array
-	 * @param string $item_name The menu item's name ('blog', 'bookmarks', etc.) to be replaced
-	 * @return int The index of the menu item in the menu array
-	 */
-	public function findMenuIndex($menu, $item_name) {
-		$found = false;
-
-		if (is_array($menu)) {
-			foreach ($menu as $index => $menu_obj) {
-				if ($menu_obj->getName() === $item_name) {
-					$found = true;
-					break;
-				}
-			}
-		}
-		return $found ? $index : false;
-	}
-
-	/**
 	 * Substitutes dynamic parts of a menu's target URL
 	 *
 	 * @param array $vars An associative array holding the menu permissions
@@ -447,21 +311,10 @@ class Api {
 
 		$prepared_vars = $vars;
 		if (isset($prepared_vars['href'])) {
-			$prepared_vars['href'] = roles_replace_dynamic_paths($prepared_vars['href']);
+			$prepared_vars['href'] = $this->replaceDynamicPaths($prepared_vars['href']);
 		}
 
 		return $prepared_vars;
-	}
-
-	/**
-	 * Gets a menu by name
-	 *
-	 * @param string $menu_name The name of the menu
-	 * @return array The array of ElggMenuItem objects from the menu
-	 */
-	public function getMenu($menu_name) {
-		global $CONFIG;
-		return $CONFIG->menus[$menu_name];
 	}
 
 	/**
@@ -670,7 +523,7 @@ class Api {
 	 * @return void
 	 */
 	function setupEvents(\ElggRole $role) {
-		
+
 		$role_perms = $this->getPermissions($role, 'events');
 		foreach ($role_perms as $event => $perm_details) {
 
@@ -680,7 +533,7 @@ class Api {
 			}
 
 			switch ($perm_details['rule']) {
-				
+
 				case self::DENY:
 					$params = elgg_extract('event', $perm_details);
 					if (isset($params['handler'])) {
@@ -773,6 +626,88 @@ class Api {
 			'forward' => is_string($forward) ? $this->replaceDynamicPaths($forward) : $forward,
 			'error' => $error,
 		);
+	}
+
+	/**
+	 * Setup menu
+	 *
+	 * @param ElggRole       $role      Role object
+	 * @param string         $menu_name Menu name
+	 * @param ElggMenuItem[] $menu      Menu items
+	 * @return ElggMenuItem[]
+	 */
+	public function setupMenu(\ElggRole $role, $menu_name = '', $menu = array()) {
+
+		$role_perms = $this->getPermissions($role, 'menus');
+
+		foreach ($role_perms as $menu_rule => $perm_details) {
+			if (empty($menu_rule)) {
+				continue;
+			}
+
+			$menu_rule_parts = explode('::', $menu_rule);
+			if (elgg_extract(0, $menu_rule_parts) != $menu_name) {
+				continue;
+			}
+			$menu_item_name = elgg_extract(1, $menu_rule_parts);
+
+			// Check if this rule relates to the currently triggered menu and if we're in the right context for the current rule
+			if (!$this->checkContext($perm_details)) {
+				continue;
+			}
+
+			// Try to act on this permission rule
+			switch ($perm_details['rule']) {
+				case self::DENY:
+					if (!$menu_item_name) {
+						$menu = array();
+					} else {
+						foreach ($menu as $key => $item) {
+							if (!$item instanceof ElggMenuItem) {
+								continue;
+							}
+							if ($item->getName() == $menu_item_name || $item->getParentName() == $menu_item_name) {
+								unset($menu[$key]);
+							}
+						}
+					}
+					break;
+
+				case self::EXTEND:
+					$menu_item = elgg_extract('menu_item', $perm_details);
+					if ($menu_item) {
+						$menu[] = ElggMenuItem::factory($this->prepareMenuVars($menu_item));
+					}
+					break;
+
+				case self::REPLACE:
+					$menu_item = elgg_extract('menu_item', $perm_details);
+					if (!$menu_item_name || !$menu_item) {
+						break;
+					}
+
+					$new_item = ElggMenuItem::factory($this->prepareMenuVars($menu_item));
+					foreach ($menu as $key => $item) {
+						if (!$item instanceof ElggMenuItem) {
+							continue;
+						}
+						if ($item->getName() == $menu_item_name) {
+							$menu[$key] = $new_item;
+						} else if ($item->getParentName() == $menu_item_name) {
+							$item->setParentName($new_item->getName());
+							$menu[$key] = $item;
+						}
+					}
+					break;
+
+				case self::ALLOW:
+				default:
+					break;
+			}
+		}
+
+		// Return the updated menu to the hook triggering function (elgg_view_menu)
+		return $menu;
 	}
 
 }
