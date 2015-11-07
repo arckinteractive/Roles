@@ -369,7 +369,7 @@ class Api {
 			return preg_match($pattern, $path);
 		} else {
 			// The rule contains a simple string; default string comparision will be used
-			return ($rule == $path);
+			return elgg_normalize_url($rule) == elgg_normalize_url($path);
 		}
 	}
 
@@ -707,6 +707,57 @@ class Api {
 		}
 
 		// Return the updated menu to the hook triggering function (elgg_view_menu)
+		return $menu;
+	}
+
+	/**
+	 * Remove items that link to denied pages and actions
+	 * 
+	 * @param ElggRole       $role Role object
+	 * @param ElggMenuItem[] $menu Menu
+	 * @return ElggMenuItem[]
+	 */
+	public function cleanMenu(\ElggRole $role, $menu = array()) {
+
+		$pages = $this->getPermissions($role, 'pages');
+		$actions = $this->getPermissions($role, 'actions');
+
+		$paths = array();
+		foreach ($pages as $rule => $opts) {
+			if ($opts['rule'] == self::DENY) {
+				$paths[] = $this->replaceDynamicPaths($rule);
+			}
+		}
+		foreach ($actions as $rule => $opts) {
+			if ($opts['rule'] == self::DENY) {
+				$paths[] = $this->replaceDynamicPaths("action/$rule");
+			}
+		}
+
+		$remove = array();
+		// Unregister menu items that link to pages and actions that have been denied
+		foreach ($menu as $key => $item) {
+			if (!$item instanceof ElggMenuItem) {
+				continue;
+			}
+
+			$href = $item->getHref();
+			foreach ($paths as $path) {
+				if ($this->matchPath($path, $href)) {
+					$remove[] = $item->getName();
+				}
+			}
+		}
+
+		foreach ($menu as $key => $item) {
+			if (!$item instanceof ElggMenuItem) {
+				continue;
+			}
+			if (in_array($item->getName(), $remove) || in_array($item->getParentName(), $remove)) {
+				unset($menu[$key]);
+			}
+		}
+
 		return $menu;
 	}
 

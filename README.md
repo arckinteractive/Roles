@@ -592,3 +592,4 @@ extension plugin:
  * Cache is no longer written to the global `$PERMISSIONS_CACHE`. It is not a private property of the `\Elgg\Roles\Api` class
  * `extends` and `permissions` metadata of the `ElggRole` object can no longer be access directly. Use `ElggRole::setExtends()`, `ElggRole::getExtends()`, `ElggRole:setPermissions()` and `ElggRole::getPermissions()`
  * `title` attribute of the `ElggRole` object is now stored as a raw string. Use `ElggRole::getDisplayName()` to display an i18n title
+ * All menu items that link to denied pages and actions will now be removed automatically. Unregister the `roles_menus_cleanup` handler to revert to old behavior.

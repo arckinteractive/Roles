@@ -312,4 +312,57 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 		return $menu;
 	}
 
+	public function testCleanMenu() {
+
+		$role = $this->api->getRoleByName('tester1');
+		$item = \ElggMenuItem::factory(array(
+			'name' => 'foo',
+			'href' => 'action/bar/foo',
+			'text' => 'foo',
+		));
+
+		$this->assertNotContains($item, $this->api->cleanMenu($role, [$item]));
+	}
+
+	/**
+	 * @dataProvider providerMatchPath
+	 */
+	public function testMatchPath($expectation, $a, $b) {
+		if ($expectation === true) {
+			$this->assertTrue($this->api->matchPath($a, $b));
+		} else if ($expectation === false) {
+			$this->assertFalse($this->api->matchPath($a, $b));
+		}
+	}
+
+	public function providerMatchPath() {
+
+		return array(
+			array(
+				true,
+				'blog/edit',
+				'/blog/edit',
+			),
+			array(
+				true,
+				'blog/save',
+				elgg_normalize_url('blog/save'),
+			),
+			array(
+				false,
+				'blog/view/123',
+				'/groups/blog/view/123',
+			),
+			array(
+				true,
+				'/blog/add/234',
+				'blog/add/234',
+			),
+			array(
+				false,
+				'/blog/new/345',
+				'/blog/new/',
+			)
+		);
+	}
 }

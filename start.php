@@ -43,6 +43,7 @@ function roles_init() {
 
 	// Remove menu items after all items have been registered
 	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_permissions', 9999);
+	elgg_register_plugin_hook_handler('register', 'all', 'roles_menus_cleanup', 9999);
 
 	// Check for role configuration updates
 	if (elgg_is_admin_logged_in()) { // @TODO think through if this should rather be a role-based permission
@@ -124,7 +125,7 @@ function roles_actions_permissions($hook_name, $action, $return_value, $params) 
 /**
  * Processes menu permissions from the role configuration array. This is called upon each "register" triggered hook.
  *
- * @param string         $hook   "prepare"
+ * @param string         $hook   "register"
  * @param string         $type   The triggered "register" hook's type
  * @param ElggMenuItem[] $menu   Return value
  * @return void
@@ -145,6 +146,32 @@ function roles_menus_permissions($hook, $type, $menu) {
 	}
 
 	return roles()->setupMenu($role, $menu_name, $menu);
+}
+
+/**
+ * Remove all menu items that link to denied pages and actions
+ *
+ * @param string         $hook   "register"
+ * @param string         $type   The triggered "register" hook's type
+ * @param ElggMenuItem[] $menu   Return value
+ * @return void
+ */
+function roles_menus_cleanup($hook, $type, $menu) {
+
+	$menu_name = explode(':', $type);
+	$hook_type = array_shift($type);
+	$menu_name = implode(':', $menu_name);
+
+	if ($hook_type !== 'menu' || empty($menu_name)) {
+		return;
+	}
+
+	$role = roles_get_role();
+	if (!$role instanceof ElggRole) {
+		return;
+	}
+
+	return roles()->cleanMenu($role, $menu);
 }
 
 /**
