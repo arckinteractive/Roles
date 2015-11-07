@@ -14,9 +14,6 @@ matrix:
     - php: 5.6
       env: VARIA=true
       install:
-        - node -v
-        - pear install pear/PHP_CodeSniffer
-        - git clone https://github.com/Elgg/elgg-coding-standards.git ../elgg-coding-standards/
         - phpenv rehash
         - composer self-update
         - composer global require fxp/composer-asset-plugin
@@ -30,7 +27,6 @@ matrix:
         - wget https://scrutinizer-ci.com/ocular.phar
 
       script:
-       - phpcs --standard=../elgg-coding-standards/elgg.xml --warning-severity=0 --ignore=*../Elgg/mod/roles/tests/*,*./Elgg/mod/roles/vendors/* ../Elgg/mod/roles/
        - phpunit --coverage-clover=coverage.clover
 
       after_script:
