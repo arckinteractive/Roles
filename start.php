@@ -191,7 +191,7 @@ function roles_pages_permissions($hook, $type, $route) {
 	$identifier = elgg_extract('identifier', $route, elgg_extract('handler', $route));
 	array_unshift($segments, $identifier);
 
-	$result = roles()->pageGatekeeper($role, implode('/', $identifier));
+	$result = roles()->pageGatekeeper($role, implode('/', $segments));
 
 	$error = elgg_extract('error', $result);
 	$forward = elgg_extract('forward', $result);
