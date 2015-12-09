@@ -132,7 +132,7 @@ function roles_actions_permissions($hook_name, $action, $return_value, $params) 
 function roles_menus_permissions($hook, $type, $menu) {
 
 	$menu_name = explode(':', $type);
-	$hook_type = array_shift($type);
+	$hook_type = array_shift($menu_name);
 	$menu_name = implode(':', $menu_name);
 	
 	if ($hook_type !== 'menu' || empty($menu_name)) {
@@ -158,7 +158,7 @@ function roles_menus_permissions($hook, $type, $menu) {
 function roles_menus_cleanup($hook, $type, $menu) {
 
 	$menu_name = explode(':', $type);
-	$hook_type = array_shift($type);
+	$hook_type = array_shift($menu_name);
 	$menu_name = implode(':', $menu_name);
 
 	if ($hook_type !== 'menu' || empty($menu_name)) {
