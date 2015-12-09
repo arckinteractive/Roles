@@ -3,7 +3,7 @@
 
 	<name>Roles</name>
 	<id>roles</id>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 
 	<blurb>User roles</blurb>
 	<description>Implements a generic roles framework to allow creating custom user roles.</description>
